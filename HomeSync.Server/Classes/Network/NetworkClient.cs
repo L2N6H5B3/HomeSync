@@ -36,14 +36,14 @@ namespace HomeSync.Classes.Network {
                     // Connect the Socket
                     socket.Connect(remoteEndPoint);
 
-                    System.Diagnostics.Debug.WriteLine("Socket connected to {0}", socket.RemoteEndPoint.ToString());
+                    System.Diagnostics.Debug.WriteLine($"Socket connected to {socket.RemoteEndPoint}");
 
                 } catch (ArgumentNullException ane) {
-                    System.Diagnostics.Debug.WriteLine("ArgumentNullException : {0}", ane.ToString());
+                    System.Diagnostics.Debug.WriteLine($"ArgumentNullException : {ane}");
                 } catch (SocketException se) {
-                    System.Diagnostics.Debug.WriteLine("SocketException : {0}", se.ToString());
+                    System.Diagnostics.Debug.WriteLine($"SocketException : {se}");
                 } catch (Exception e) {
-                    System.Diagnostics.Debug.WriteLine("Unexpected exception : {0}", e.ToString());
+                    System.Diagnostics.Debug.WriteLine($"Unexpected exception : {e}");
                 }
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.ToString());

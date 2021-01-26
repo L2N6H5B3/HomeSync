@@ -54,12 +54,18 @@ namespace HomeSync.Client {
 
             #region Start Server ##############################################
 
-            new Thread(() => {
-                Thread.CurrentThread.IsBackground = true;
+            server = new NetworkServer();
+            server.ResponseEvent += Server_ResponseEvent;
+            server.Start();
 
-                server = new NetworkServer();
-                server.ResponseEvent += Server_ResponseEvent;
-            }).Start();
+            //new Thread(() => {
+            //    Thread.CurrentThread.IsBackground = true;
+
+            //    server = new NetworkServer();
+            //    server.ResponseEvent += Server_ResponseEvent;
+            //    server.Start();
+
+            //}).Start();
 
             #endregion ########################################################
 

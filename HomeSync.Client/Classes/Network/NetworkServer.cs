@@ -17,9 +17,6 @@ namespace HomeSync.Classes.Network {
         public event EventHandler<ResponseArgs> ResponseEvent;
 
         public NetworkServer() {
-            // Data buffer for incoming data.  
-            byte[] bytes = new Byte[1024];
-
             // Establish the local endpoint for the socket.  
             ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             ipAddress = ipHostInfo.AddressList.First(xx => xx.AddressFamily == AddressFamily.InterNetwork);
@@ -27,6 +24,11 @@ namespace HomeSync.Classes.Network {
 
             // Create a TCP/IP socket.  
             socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        }
+
+        public void Start() {
+            // Data buffer for incoming data 
+            byte[] bytes = new Byte[1024];
 
             // Bind the socket to the local endpoint and listen for incoming connections
             try {
