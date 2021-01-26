@@ -43,7 +43,7 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    System.Diagnostics.Debug.WriteLine("Waiting for a connection...");
+                    System.Diagnostics.Debug.WriteLine("ServerSocket: Waiting for a connection...");
                     // Program is suspended while waiting for an incoming connection.  
                     Socket client = socket.Accept();
                     data = null;
@@ -56,9 +56,9 @@ namespace HomeSync.Classes.Network {
                     if (!clients.Contains(clientAddress)) {
                         // Add Client IP to Registered Clients
                         clients.Add(clientAddress);
-                        System.Diagnostics.Debug.WriteLine($"New Client Connected: {clientAddress}");
+                        System.Diagnostics.Debug.WriteLine($"ServerSocket: New Client Connected: {clientAddress}");
                     } else {
-                        System.Diagnostics.Debug.WriteLine($"Old Client Connected: {clientAddress}");
+                        System.Diagnostics.Debug.WriteLine($"ServerSocket: Old Client Connected: {clientAddress}");
 
                     }
 
@@ -71,12 +71,12 @@ namespace HomeSync.Classes.Network {
                         }
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"Received: {data} from {clientAddress}");
+                    System.Diagnostics.Debug.WriteLine($"ServerSocket: Received {data} from {clientAddress}");
 
                     // Process Data
                     ProcessRequest(data, client);
 
-                    System.Diagnostics.Debug.WriteLine("Client request complete, closing connection... ");
+                    System.Diagnostics.Debug.WriteLine("ServerSocket: Client request complete, closing connection... ");
 
                     listening = false;
                     // Close Client Socket

@@ -40,14 +40,14 @@ namespace HomeSync.Classes.Network {
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
 
-                System.Diagnostics.Debug.WriteLine($"Socket connected to {socket.RemoteEndPoint}");
+                System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket connected to {socket.RemoteEndPoint}");
 
             } catch (ArgumentNullException ane) {
-                System.Diagnostics.Debug.WriteLine($"ArgumentNullException: {ane}");
+                System.Diagnostics.Debug.WriteLine($"ServerSocket: ArgumentNullException: {ane}");
             } catch (SocketException se) {
-                System.Diagnostics.Debug.WriteLine($"SocketException: {se}");
+                System.Diagnostics.Debug.WriteLine($"ServerSocket: SocketException: {se}");
             } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine($"Unexpected exception: {e}");
+                System.Diagnostics.Debug.WriteLine($"ServerSocket: Unexpected exception: {e}");
             }
         }
 
@@ -75,7 +75,7 @@ namespace HomeSync.Classes.Network {
             // Send Data through Socket and Return Bytes Sent
             int sentBytes = socket.Send(msg);
 
-            System.Diagnostics.Debug.WriteLine($"Socket Sent {sentBytes} Bytes");
+            System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket Sent {sentBytes} Bytes");
 
             // Response from Server
             string response = Receive();
@@ -87,7 +87,7 @@ namespace HomeSync.Classes.Network {
             // Convert Bytes into String Response
             string response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-            System.Diagnostics.Debug.WriteLine($"Response: {response}");
+            System.Diagnostics.Debug.WriteLine($"ServerSocket: Response: {response}");
 
             // Close Socket
             Close();

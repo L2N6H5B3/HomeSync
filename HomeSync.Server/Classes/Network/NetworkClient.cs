@@ -36,14 +36,14 @@ namespace HomeSync.Classes.Network {
                     // Connect the Socket
                     socket.Connect(remoteEndPoint);
 
-                    System.Diagnostics.Debug.WriteLine($"Socket connected to {socket.RemoteEndPoint}");
+                    System.Diagnostics.Debug.WriteLine($"ClientSocket: Socket connected to {socket.RemoteEndPoint}");
 
                 } catch (ArgumentNullException ane) {
-                    System.Diagnostics.Debug.WriteLine($"ArgumentNullException : {ane}");
+                    System.Diagnostics.Debug.WriteLine($"ClientSocket: ClientSocketArgumentNullException : {ane}");
                 } catch (SocketException se) {
-                    System.Diagnostics.Debug.WriteLine($"SocketException : {se}");
+                    System.Diagnostics.Debug.WriteLine($"ClientSocket: SocketException : {se}");
                 } catch (Exception e) {
-                    System.Diagnostics.Debug.WriteLine($"Unexpected exception : {e}");
+                    System.Diagnostics.Debug.WriteLine($"ClientSocket: Unexpected exception : {e}");
                 }
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.ToString());
@@ -74,7 +74,7 @@ namespace HomeSync.Classes.Network {
             // Convert Bytes into String Response
             string response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-            System.Diagnostics.Debug.WriteLine($"Response: {response}");
+            System.Diagnostics.Debug.WriteLine($"ClientSocket: Response {response}");
 
             // Close Socket
             Close();
