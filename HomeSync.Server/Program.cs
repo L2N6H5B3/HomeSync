@@ -16,6 +16,7 @@ namespace HomeSync.Server {
 
     static class Program {
 
+        private static Settings settings;
         private static ObjectStore TVstore;
         private static Library TVlibrary;
         private static NetworkServer server;
@@ -52,6 +53,15 @@ namespace HomeSync.Server {
             #endregion ########################################################
 
 
+            #region Configure Application #####################################
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            settings = new Settings();
+
+            #endregion ########################################################
+
+
             #region Start Server ##############################################
 
             new Thread(() => {
@@ -60,6 +70,8 @@ namespace HomeSync.Server {
 
                 server = new NetworkServer();
                 server.ResponseEvent += Server_ResponseEvent;
+                // Set current status in Form
+                settings.SetStatus("Ready");
                 server.Start();
 
             }).Start();
@@ -69,9 +81,7 @@ namespace HomeSync.Server {
 
             #region Run Application ###########################################
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Settings());
+            Application.Run(settings);
 
             #endregion ########################################################
 
@@ -115,6 +125,8 @@ namespace HomeSync.Server {
 
         // Send all Resume Points to a new Client
         private static void SendAllResumePoints(string clientIp) {
+            // Set current status in Form
+            settings.SetStatus("Syncing all resume positions");
             // Get list of Recordings
             var libraryRecordings = TVlibrary.Recordings;
             // Create RecordingsJson Object
@@ -142,10 +154,14 @@ namespace HomeSync.Server {
             NetworkClient client = new NetworkClient(clientIp);
             // Send Resume Request to Client
             client.SendResumeUpdate(recordingsJsonString);
+            // Set current status in Form
+            settings.SetStatus("Ready");
         }
 
         // Send a Specific Recording's Resume Point to all Clients
         private static void SendResumeUpdate(Recording libraryRecording) {
+            // Set current status in Form
+            settings.SetStatus("Syncing resume position");
             // Create RecordingsJson Object
             RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
             // Add RecordingEntry to RecordingsJson
@@ -171,10 +187,14 @@ namespace HomeSync.Server {
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
+            // Set current status in Form
+            settings.SetStatus("Ready");
         }
 
         // Distribute a Resume Point Update made by a Client to all Other Clients
         private static void DistributeResumeUpdate(string recordingsJsonString, string fromIp) {
+            // Set current status in Form
+            settings.SetStatus("Distributing resume position");
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients().Where(xx => xx != fromIp)) {
                 // Create Network Client
@@ -182,13 +202,20 @@ namespace HomeSync.Server {
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
+            // Set current status in Form
+            settings.SetStatus("Ready");
         }
 
         // Receive a Resume Point Update made by a Client
         private static void ReceiveResumeUpdate(RecordingsJson received) {
+            // Set current status in Form
+            settings.SetStatus("Processing resume position");
             var libraryRecordings = TVlibrary.Recordings;
+            int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
-                Recording rec = libraryRecordings.FirstOrDefault(xx =>
+                // Set current status in Form
+                settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
+                libraryRecordings.FirstOrDefault(xx =>
                     xx.Program.Title == entry.programTitle &&
                     xx.Program.EpisodeTitle == entry.programEpisodeTitle &&
                     xx.Program.SeasonNumber == entry.programSeasonNumber &&
@@ -196,13 +223,11 @@ namespace HomeSync.Server {
                     xx.FileSize == entry.fileSize &&
                     xx.StartTime == entry.startTime &&
                     xx.EndTime == entry.endTime
-                );
-                if (rec != null) {
-                    System.Diagnostics.Debug.WriteLine($"Found Recording: {rec.Program.Title}");
-                    rec.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
-                }
-                
+                ).SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                currentIndex++;
             }
+            // Set current status in Form
+            settings.SetStatus("Ready");
         }
 
         #endregion ############################################################

@@ -53,6 +53,15 @@ namespace HomeSync.Client {
             #endregion ########################################################
 
 
+            #region Configure Application #####################################
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            settings = new Settings();
+
+            #endregion ########################################################
+
+
             #region Register Client and Start Server ##########################
 
             new Thread(() => {
@@ -61,18 +70,25 @@ namespace HomeSync.Client {
 
                 // Create Network Client
                 NetworkClient client = new NetworkClient();
-                System.Diagnostics.Debug.WriteLine("Connecting Client...");
+                // Set current status in Form
+                settings.SetStatus("Connecting");
                 // Connect Client
                 client.Connect();
 
                 // Continue to Attempt to connect Client
                 while (!client.IsConnected()) {
+                    // Set current status in Form
+                    settings.SetStatus("Disconnected");
                     Thread.Sleep(10000);
+                    // Set current status in Form
+                    settings.SetStatus("Connecting");
                     client.Connect();
-                    
                 }
+
                 // If Client is Connected
                 if (client.IsConnected()) {
+                    // Set current status in Form
+                    settings.SetStatus("Connected");
                     // Register Client
                     client.Register();
                 }
@@ -86,13 +102,8 @@ namespace HomeSync.Client {
             #endregion ########################################################
 
 
-
-
             #region Run Application ###########################################
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            settings = new Settings();
+            
             Application.Run(settings);
             
             #endregion ########################################################
@@ -130,6 +141,8 @@ namespace HomeSync.Client {
 
         // Send a Specific Recording's Resume Point to Server
         private static void SendResumeUpdate(Recording libraryRecording) {
+            // Set current status in Form
+            settings.SetStatus("Syncing resume position");
             // Create RecordingsJson Object
             RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
             // Add RecordingEntry to RecordingsJson
@@ -152,12 +165,19 @@ namespace HomeSync.Client {
             client.Connect();
             // Send Resume Request to Server
             client.SendResumeUpdate(recordingsJsonString);
+            // Set current status in Form
+            settings.SetStatus("Ready");
         }
 
         // Receive a Resume Point Update from Server
         private static void ReceiveResumeUpdate(RecordingsJson received) {
+            // Set current status in Form
+            settings.SetStatus("Processing resume position");
             var libraryRecordings = TVlibrary.Recordings;
+            int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
+                // Set current status in Form
+                settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
                     xx.Program.Title == entry.programTitle &&
                     xx.Program.EpisodeTitle == entry.programEpisodeTitle &&
@@ -166,8 +186,11 @@ namespace HomeSync.Client {
                     xx.FileSize == entry.fileSize &&
                     xx.StartTime == entry.startTime &&
                     xx.EndTime == entry.endTime
-                ).SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                currentIndex++;
             }
+            // Set current status in Form
+            settings.SetStatus("Ready");
         }
 
         #endregion ############################################################

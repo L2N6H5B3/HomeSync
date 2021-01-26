@@ -15,8 +15,18 @@ namespace HomeSync.Client {
             serverAddressTextbox.Text = ConfigurationManager.AppSettings.Get("server-address");
         }
 
-        public void SetStatus(string status) {
-            serverStatus.Text = status;
+        delegate void SetStatusCallback(string text);
+
+        public void SetStatus(string text) {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.InvokeRequired) {
+                SetStatusCallback d = new SetStatusCallback(SetStatus);
+                this.Invoke(d, new object[] { text });
+            } else {
+                this.serverStatus.Text = text;
+            }
         }
 
         private void saveButton_Click(object sender, EventArgs e) {

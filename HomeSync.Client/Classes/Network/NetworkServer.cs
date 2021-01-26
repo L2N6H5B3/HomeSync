@@ -52,12 +52,12 @@ namespace HomeSync.Classes.Network {
                     }
 
                     // Show the data on the console.  
-                    System.Diagnostics.Debug.WriteLine($"Text received: {data}");
+                    System.Diagnostics.Debug.WriteLine($"Received: {data} from Server");
 
                     // Process Data
                     ProcessRequest(data, client);
 
-                    System.Diagnostics.Debug.WriteLine("Server Closing...");
+                    System.Diagnostics.Debug.WriteLine("Client request complete, closing connection... ");
 
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
