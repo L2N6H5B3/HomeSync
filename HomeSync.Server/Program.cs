@@ -85,6 +85,8 @@ namespace HomeSync.Server {
                 server = new NetworkServer(log);
                 // Add Event Handler for Server Response
                 server.ResponseEvent += Server_ResponseEvent;
+                // Add Event Handler for Server Status
+                server.StatusEvent += Server_StatusEvent;
                 // Write to Log
                 log.WriteLine("NetworkServer: Starting");
                 // Set current status in Form
@@ -132,6 +134,10 @@ namespace HomeSync.Server {
                     break;
             }
 
+        }
+
+        private static void Server_StatusEvent(object sender, StatusArgs e) {
+            settings.SetStatus(e.status);
         }
 
         #endregion ############################################################

@@ -86,9 +86,9 @@ namespace HomeSync.Classes.Network {
             // Split Message
             string[] dataArray = data.Split('|');
 
-            // Create new Response Args
+            // Create new ResponseArgs
             ResponseArgs args = new ResponseArgs();
-            // Set the Response Args Response Data
+            // Set the ResponseArgs Response Data
             args.responseType = dataArray[0];
             args.response = dataArray[1];
             // Raise Response Event

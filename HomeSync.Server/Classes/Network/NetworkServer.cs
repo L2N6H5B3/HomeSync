@@ -11,13 +11,13 @@ namespace HomeSync.Classes.Network {
 
         private Log log;
         private string data = null;
-        private bool listening = false;
         private Socket socket;
         private List<string> clients;
         private IPHostEntry ipHostInfo;
         private IPAddress ipAddress;
         private IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
+        public event EventHandler<StatusArgs> StatusEvent;
 
         public NetworkServer(Log log) {
 
@@ -43,15 +43,18 @@ namespace HomeSync.Classes.Network {
             try {
                 socket.Bind(localEndPoint);
                 socket.Listen(10);
-                listening = true;
 
                 // Start listening for connections
                 while (true) {
                     // Write to Log
                     log.WriteLine("NetworkServer: Socket Listening");
+                    // Set Status
+                    RefreshServerStatus("Listening");
                     // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;
+                    // Set Status
+                    RefreshServerStatus("Connected");
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
                     // If Client IP is not in Registered Clients
@@ -87,13 +90,16 @@ namespace HomeSync.Classes.Network {
                     client.Close();
                     // Write to Log
                     log.WriteLine("NetworkServer: HomeSyncClient Disconnected");
-
+                    // Set Status
+                    RefreshServerStatus("Disconnected");
                     // Process Data
                     ProcessRequest(data, clientAddress);
                 }
 
             }
             catch (Exception e) {
+                // Set Status
+                RefreshServerStatus("Stopped");
                 System.Diagnostics.Debug.WriteLine(e.ToString());
             }
         }
@@ -107,9 +113,9 @@ namespace HomeSync.Classes.Network {
             // Split Message
             string[] dataArray = data.Split('|');
 
-            // Create new Response Args
+            // Create new ResponseArgs
             ResponseArgs args = new ResponseArgs();
-            // Set the Response Args Response Data
+            // Set the ResponseArgs Response Data
             args.responseType = dataArray[0];
             args.response = dataArray[1];
             args.clientIp = clientAddress;
@@ -117,8 +123,13 @@ namespace HomeSync.Classes.Network {
             ResponseEvent(this, args);
         }
 
-        public bool IsListening() {
-            return listening;
+        private void RefreshServerStatus(string status) {
+            // Create new Response Args
+            StatusArgs args = new StatusArgs();
+            // Set the StatusArgs Response Data
+            args.status = status;
+            // Raise Response Event
+            StatusEvent(this, args);
         }
     }
     
@@ -126,6 +137,10 @@ namespace HomeSync.Classes.Network {
         public string responseType;
         public string response;
         public string clientIp;
+    }
+
+    class StatusArgs : EventArgs {
+        public string status;
     }
 }
 
