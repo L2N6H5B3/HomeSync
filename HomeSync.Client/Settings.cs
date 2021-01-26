@@ -12,11 +12,15 @@ namespace HomeSync.Client {
     public partial class Settings : Form {
         public Settings() {
             InitializeComponent();
-            serverAddressTextbox.Text = ConfigurationManager.AppSettings.Get("ip-address");
+            serverAddressTextbox.Text = ConfigurationManager.AppSettings.Get("server-address");
+        }
+
+        public void SetStatus(string status) {
+            serverStatus.Text = status;
         }
 
         private void saveButton_Click(object sender, EventArgs e) {
-            ConfigurationManager.AppSettings.Set("ip-address", serverAddressTextbox.Text);
+            ConfigurationManager.AppSettings.Set("server-address", serverAddressTextbox.Text);
             Hide();
         }
 

@@ -10,6 +10,7 @@ namespace HomeSync.Classes.Network {
     class NetworkServer {
 
         private string data = null;
+        private bool listening = false;
         private Socket socket;
         private List<string> clients;
         private IPHostEntry ipHostInfo;
@@ -38,6 +39,7 @@ namespace HomeSync.Classes.Network {
             try {
                 socket.Bind(localEndPoint);
                 socket.Listen(10);
+                listening = true;
 
                 // Start listening for connections
                 while (true) {
@@ -49,10 +51,15 @@ namespace HomeSync.Classes.Network {
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
 
+
                     // If Client IP is not in Registered Clients
                     if (!clients.Contains(clientAddress)) {
                         // Add Client IP to Registered Clients
                         clients.Add(clientAddress);
+                        System.Diagnostics.Debug.WriteLine($"New Client Connected: {clientAddress}");
+                    } else {
+                        System.Diagnostics.Debug.WriteLine($"Old Client Connected: {clientAddress}");
+
                     }
 
                     // An incoming connection needs to be processed.  
@@ -64,14 +71,14 @@ namespace HomeSync.Classes.Network {
                         }
                     }
 
-                    // Show the data on the console.  
-                    System.Diagnostics.Debug.WriteLine("Text received : {0}", data);
+                    System.Diagnostics.Debug.WriteLine($"Received: {data} from {clientAddress}");
 
                     // Process Data
                     ProcessRequest(data, client);
 
-                    System.Diagnostics.Debug.WriteLine("Server Closing...");
+                    System.Diagnostics.Debug.WriteLine("Client request complete, closing connection... ");
 
+                    listening = false;
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
@@ -107,6 +114,10 @@ namespace HomeSync.Classes.Network {
             byte[] msg = Encoding.ASCII.GetBytes("ok");
             // Send OK to Client
             client.Send(msg);
+        }
+
+        public bool IsListening() {
+            return listening;
         }
     }
     

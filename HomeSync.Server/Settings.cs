@@ -15,6 +15,10 @@ namespace HomeSync.Server {
             
         }
 
+        public void SetStatus(string status) {
+            serverStatus.Text = status;
+        }
+
         private void saveButton_Click(object sender, EventArgs e) {
             Hide();
         }

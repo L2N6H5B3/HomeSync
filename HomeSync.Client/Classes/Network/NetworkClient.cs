@@ -29,21 +29,25 @@ namespace HomeSync.Classes.Network {
                 // Create a TCP/IP socket
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-                try {
-                    // Connect the Socket
-                    socket.Connect(remoteEndPoint);
-
-                    System.Diagnostics.Debug.WriteLine($"Socket connected to {socket.RemoteEndPoint}");
-
-                } catch (ArgumentNullException ane) {
-                    System.Diagnostics.Debug.WriteLine($"ArgumentNullException : {ane}");
-                } catch (SocketException se) {
-                    System.Diagnostics.Debug.WriteLine($"SocketException : {se}");
-                } catch (Exception e) {
-                    System.Diagnostics.Debug.WriteLine($"Unexpected exception : {e}");
-                }
+                
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.ToString());
+            }
+        }
+
+        public void Connect() {
+            try {
+                // Connect the Socket
+                socket.Connect(remoteEndPoint);
+
+                System.Diagnostics.Debug.WriteLine($"Socket connected to {socket.RemoteEndPoint}");
+
+            } catch (ArgumentNullException ane) {
+                System.Diagnostics.Debug.WriteLine($"ArgumentNullException: {ane}");
+            } catch (SocketException se) {
+                System.Diagnostics.Debug.WriteLine($"SocketException: {se}");
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine($"Unexpected exception: {e}");
             }
         }
 
@@ -96,6 +100,10 @@ namespace HomeSync.Classes.Network {
             // Release the socket.
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
+        }
+
+        public bool IsConnected() {
+            return socket.Connected;
         }
     }
 }

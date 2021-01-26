@@ -16,6 +16,7 @@ namespace HomeSync.Client {
 
     static class Program {
 
+        private static Settings settings;
         private static ObjectStore TVstore;
         private static Library TVlibrary;
         private static NetworkServer server;
@@ -54,9 +55,7 @@ namespace HomeSync.Client {
 
             #region Register Client ###########################################
 
-            // Create Network Client
-            NetworkClient client = new NetworkClient();
-            client.Register();
+            
 
             #endregion ########################################################
 
@@ -65,6 +64,24 @@ namespace HomeSync.Client {
 
             new Thread(() => {
                 Thread.CurrentThread.IsBackground = true;
+
+                // Create Network Client
+                NetworkClient client = new NetworkClient();
+                System.Diagnostics.Debug.WriteLine("Connecting Client...");
+                // Connect Client
+                client.Connect();
+
+                // Continue to Attempt to connect Client
+                while (!client.IsConnected()) {
+                    Thread.Sleep(10000);
+                    System.Diagnostics.Debug.WriteLine("Connecting Client...");
+                    client.Connect();
+                    
+                }
+                if (client.IsConnected()) {
+                    System.Diagnostics.Debug.WriteLine("Registering Client...");
+                    client.Register();
+                }
 
                 server = new NetworkServer();
                 server.ResponseEvent += Server_ResponseEvent;
@@ -79,7 +96,8 @@ namespace HomeSync.Client {
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Settings());
+            settings = new Settings();
+            Application.Run(settings);
             
             #endregion ########################################################
 
@@ -135,6 +153,9 @@ namespace HomeSync.Client {
             
             // Create Network Client
             NetworkClient client = new NetworkClient();
+            // Connect Client
+            client.Connect();
+            // Send Resume Request to Server
             client.SendResumeUpdate(recordingsJsonString);
         }
 
