@@ -84,7 +84,7 @@ namespace HomeSync.Classes.Network {
         }
 
         private void Close() {
-            // Release the socket.
+            // Release the socket
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
 

@@ -37,7 +37,7 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    System.Diagnostics.Debug.WriteLine("ClientSocket: Waiting for a connection...");
+                    System.Diagnostics.Debug.WriteLine("ClientSocket: Socket Ready");
                     // Program is suspended while waiting for an incoming connection.  
                     Socket client = socket.Accept();
                     data = null;
@@ -57,7 +57,7 @@ namespace HomeSync.Classes.Network {
                     // Process Data
                     ProcessRequest(data, client);
 
-                    System.Diagnostics.Debug.WriteLine("ClientSocket: Server request complete, closing connection... ");
+                    System.Diagnostics.Debug.WriteLine("ClientSocket: Socket Closed");
 
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);

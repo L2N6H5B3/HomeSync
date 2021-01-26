@@ -100,7 +100,7 @@ namespace HomeSync.Classes.Network {
             // Release the socket.
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
-            System.Diagnostics.Debug.WriteLine($"ClientSocket: Socket Closed");
+            System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket Closed");
         }
 
         public bool IsConnected() {
