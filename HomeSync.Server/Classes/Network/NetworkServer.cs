@@ -53,19 +53,19 @@ namespace HomeSync.Classes.Network {
                     // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;
-                    // Set Status
-                    RefreshServerStatus("Connected");
+
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
+                    // Write to Log
+                    log.WriteLine($"NetworkServer: HomeSyncClient ({clientAddress}) Connected");
+                    // Set Status
+                    RefreshServerStatus("Connected");
                     // If Client IP is not in Registered Clients
                     if (!clients.Contains(clientAddress)) {
                         // Add Client IP to Registered Clients
                         clients.Add(clientAddress);
                         // Write to Log
-                        log.WriteLine($"NetworkServer: New HomeSyncClient {clientAddress} Connected");
-                    } else {
-                        // Write to Log
-                        log.WriteLine($"NetworkServer: Existing HomeSyncClient {clientAddress} Connected");
+                        log.WriteLine($"NetworkServer: Adding HomeSyncClient ({clientAddress}) to Known Clients List");
                     }
 
                     // An incoming connection needs to be processed
@@ -78,7 +78,7 @@ namespace HomeSync.Classes.Network {
                     }
 
                     // Write to Log
-                    log.WriteLine($"NetworkServer: HomeSyncClient {clientAddress} sent: {data.Split('|')[0]}");
+                    log.WriteLine($"NetworkServer: HomeSyncClient ({clientAddress}) sent: {data.Split('|')[0]}");
 
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("ok");
@@ -89,7 +89,7 @@ namespace HomeSync.Classes.Network {
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
                     // Write to Log
-                    log.WriteLine("NetworkServer: HomeSyncClient Disconnected");
+                    log.WriteLine("NetworkServer: HomeSyncClient ({clientAddress}) Disconnected");
                     // Set Status
                     RefreshServerStatus("Disconnected");
                     // Process Data
