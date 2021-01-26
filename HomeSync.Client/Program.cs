@@ -86,8 +86,6 @@ namespace HomeSync.Client {
             #endregion ########################################################
 
 
-
-
             #region Run Application ###########################################
 
             Application.EnableVisualStyles();
