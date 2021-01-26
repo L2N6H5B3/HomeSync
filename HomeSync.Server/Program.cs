@@ -53,16 +53,15 @@ namespace HomeSync.Server {
 
 
             #region Start Server ##############################################
-            server = new NetworkServer();
-            server.ResponseEvent += Server_ResponseEvent;
-            server.Start();
 
-            //new Thread(() =>
-            //{
-            //    Thread.CurrentThread.IsBackground = true;
+            new Thread(() => {
+                Thread.CurrentThread.IsBackground = true;
 
-                
-            //}).Start();
+                server = new NetworkServer();
+                server.ResponseEvent += Server_ResponseEvent;
+                server.Start();
+
+            }).Start();
 
             #endregion ########################################################
 
@@ -86,6 +85,7 @@ namespace HomeSync.Server {
             var recording = libraryRecordings.FirstOrDefault(xx => xx.Id == e.ObjectId);
             // If Recording Exists
             if (recording != null) {
+                System.Diagnostics.Debug.WriteLine("Updating Recording Resume Time");
                 // Send the Resume Point Update
                 SendResumeUpdate(recording);
             }
