@@ -40,10 +40,12 @@ namespace HomeSync.Classes.Network {
                 ipAddress = IPAddress.Parse(ConfigurationManager.AppSettings.Get("server-address"));
                 // Set Remote EndPoint
                 remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
+                // Write to Log
+                log.WriteLine("NetworkClient: Connecting");
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
                 // Write to Log
-                log.WriteLine($"NetworkClient Connect: Connected");
+                log.WriteLine($"NetworkClient: Connected");
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Connect: ArgumentNullException: {ane}");

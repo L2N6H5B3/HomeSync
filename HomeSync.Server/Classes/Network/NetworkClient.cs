@@ -36,6 +36,8 @@ namespace HomeSync.Classes.Network {
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 try {
+                    // Write to Log
+                    log.WriteLine("NetworkClient: Connecting");
                     // Connect the Socket
                     socket.Connect(remoteEndPoint);
                     // Write to Log

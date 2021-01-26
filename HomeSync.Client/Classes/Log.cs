@@ -19,7 +19,7 @@ namespace HomeSync.Classes {
             // Create StreamWriter Object
             streamWriter = new StreamWriter(Path.Combine(logFilePath, logFileName), true);
             // Write Separator to Log
-            WriteLine($"--- HomeSync Log | Start {DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")} ---", false);
+            WriteLine($"--- HomeSync Client Log | Start {DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")} ---", false);
         }
 
         public void WriteLine(string message, bool dateTime = true) {

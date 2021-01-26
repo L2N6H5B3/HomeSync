@@ -84,8 +84,6 @@ namespace HomeSync.Client {
 
                 // Create Network Client
                 NetworkClient client = new NetworkClient(log);
-                // Write to Log
-                log.WriteLine("NetworkClient: Connecting");
                 // Set current status in Form
                 settings.SetStatus("Connecting");
                 // Connect Client
@@ -93,13 +91,9 @@ namespace HomeSync.Client {
 
                 // Continue to Attempt to connect Client
                 while (!client.IsConnected()) {
-                    // Write to Log
-                    log.WriteLine("NetworkClient: Disconnected");
                     // Set current status in Form
                     settings.SetStatus("Disconnected");
                     Thread.Sleep(10000);
-                    // Write to Log
-                    log.WriteLine("NetworkClient: Connecting");
                     // Set current status in Form
                     settings.SetStatus("Connecting");
                     client.Connect();
@@ -107,8 +101,6 @@ namespace HomeSync.Client {
 
                 // If Client is Connected
                 if (client.IsConnected()) {
-                    // Write to Log
-                    log.WriteLine("NetworkClient: Connected");
                     // Set current status in Form
                     settings.SetStatus("Connected");
                     // Register Client

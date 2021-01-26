@@ -60,7 +60,7 @@ namespace HomeSync.Classes.Network {
                         }
                     }
                     // Write to Log
-                    log.WriteLine($"NetworkServer: HomeSyncServer {clientAddress} sent: {data}");
+                    log.WriteLine($"NetworkServer: HomeSyncServer {clientAddress} sent: {data.Split("|")[0]}");
 
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("ok");
