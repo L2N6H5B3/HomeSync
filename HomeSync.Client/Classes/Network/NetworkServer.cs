@@ -73,6 +73,11 @@ namespace HomeSync.Classes.Network {
             // Split Message
             string[] dataArray = data.Split('|');
 
+            // Convert OK Data
+            byte[] msg = Encoding.ASCII.GetBytes("ok");
+            // Send OK to Client
+            client.Send(msg);
+
             // Create new Response Args
             ResponseArgs args = new ResponseArgs();
             // Set the Response Args Response Data
@@ -80,11 +85,6 @@ namespace HomeSync.Classes.Network {
             args.response = dataArray[1];
             // Raise Response Event
             ResponseEvent(this, args);
-
-            // Convert OK Data
-            byte[] msg = Encoding.ASCII.GetBytes("ok");
-            // Send OK to Client
-            client.Send(msg);
         }
     }
     
