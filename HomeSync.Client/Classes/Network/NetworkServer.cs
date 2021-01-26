@@ -54,14 +54,20 @@ namespace HomeSync.Classes.Network {
                     // Show the data on the console.  
                     System.Diagnostics.Debug.WriteLine($"ClientSocket: Received: {data} from Server");
 
-                    // Process Data
-                    ProcessRequest(data, client);
-
-                    System.Diagnostics.Debug.WriteLine("ClientSocket: Socket Closed");
+                    // Convert OK Data
+                    byte[] msg = Encoding.ASCII.GetBytes("ok");
+                    // Send OK to Client
+                    client.Send(msg);
 
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
+
+                    System.Diagnostics.Debug.WriteLine("ClientSocket: Socket Closed");
+
+                    // Process Data
+                    ProcessRequest(data, client);
+                    
                 }
 
             } catch (Exception e) {
@@ -72,11 +78,6 @@ namespace HomeSync.Classes.Network {
         private void ProcessRequest(string data, Socket client) {
             // Split Message
             string[] dataArray = data.Split('|');
-
-            // Convert OK Data
-            byte[] msg = Encoding.ASCII.GetBytes("ok");
-            // Send OK to Client
-            client.Send(msg);
 
             // Create new Response Args
             ResponseArgs args = new ResponseArgs();

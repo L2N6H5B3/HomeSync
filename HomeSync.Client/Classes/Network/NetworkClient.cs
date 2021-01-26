@@ -23,12 +23,8 @@ namespace HomeSync.Classes.Network {
             try {
                 // Set IP Address
                 ipAddress = IPAddress.Parse(ConfigurationManager.AppSettings.Get("server-address"));
-                // Set Remote EndPoint
-                remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
-
                 // Create a TCP/IP socket
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
                 
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.ToString());
@@ -37,6 +33,10 @@ namespace HomeSync.Classes.Network {
 
         public void Connect() {
             try {
+                // Set IP Address
+                ipAddress = IPAddress.Parse(ConfigurationManager.AppSettings.Get("server-address"));
+                // Set Remote EndPoint
+                remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
 
@@ -75,7 +75,7 @@ namespace HomeSync.Classes.Network {
             // Send Data through Socket and Return Bytes Sent
             int sentBytes = socket.Send(msg);
 
-            System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket Sent {sentBytes} Bytes");
+            System.Diagnostics.Debug.WriteLine($"ServerSocket: Server Sent {sentBytes} Bytes");
 
             // Response from Server
             string response = Receive();

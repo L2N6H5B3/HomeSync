@@ -30,10 +30,8 @@ namespace HomeSync.Client {
             this.saveButton = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.serverStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.brokerRecordingsCheckbox = new System.Windows.Forms.CheckBox();
             this.serverAddressTextbox = new System.Windows.Forms.TextBox();
             this.serverAddressLabel = new System.Windows.Forms.Label();
-            this.brokerRecordingsLabel = new System.Windows.Forms.Label();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.settingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,7 +57,7 @@ namespace HomeSync.Client {
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(12, 189);
+            this.saveButton.Location = new System.Drawing.Point(12, 123);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(269, 35);
             this.saveButton.TabIndex = 1;
@@ -69,9 +67,10 @@ namespace HomeSync.Client {
             // 
             // statusStrip1
             // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.serverStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 236);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 170);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(293, 22);
             this.statusStrip1.SizingGrip = false;
@@ -83,17 +82,6 @@ namespace HomeSync.Client {
             this.serverStatus.Name = "serverStatus";
             this.serverStatus.Size = new System.Drawing.Size(79, 17);
             this.serverStatus.Text = "Disconnected";
-            // 
-            // brokerRecordingsCheckbox
-            // 
-            this.brokerRecordingsCheckbox.AutoSize = true;
-            this.brokerRecordingsCheckbox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.brokerRecordingsCheckbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.brokerRecordingsCheckbox.Location = new System.Drawing.Point(188, 110);
-            this.brokerRecordingsCheckbox.Name = "brokerRecordingsCheckbox";
-            this.brokerRecordingsCheckbox.Size = new System.Drawing.Size(15, 14);
-            this.brokerRecordingsCheckbox.TabIndex = 3;
-            this.brokerRecordingsCheckbox.UseVisualStyleBackColor = true;
             // 
             // serverAddressTextbox
             // 
@@ -113,16 +101,6 @@ namespace HomeSync.Client {
             this.serverAddressLabel.TabIndex = 5;
             this.serverAddressLabel.Text = "Server IP Address:";
             // 
-            // brokerRecordingsLabel
-            // 
-            this.brokerRecordingsLabel.AutoSize = true;
-            this.brokerRecordingsLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.brokerRecordingsLabel.Location = new System.Drawing.Point(16, 109);
-            this.brokerRecordingsLabel.Name = "brokerRecordingsLabel";
-            this.brokerRecordingsLabel.Size = new System.Drawing.Size(166, 15);
-            this.brokerRecordingsLabel.TabIndex = 6;
-            this.brokerRecordingsLabel.Text = "Broker Recordings to Server: ";
-            // 
             // notifyIcon
             // 
             this.notifyIcon.ContextMenuStrip = this.contextMenuStrip;
@@ -133,29 +111,30 @@ namespace HomeSync.Client {
             // 
             // contextMenuStrip
             // 
+            this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.settingsMenuItem,
             this.toolStripSeparator,
             this.exitMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(181, 76);
+            this.contextMenuStrip.Size = new System.Drawing.Size(117, 54);
             // 
             // settingsMenuItem
             // 
             this.settingsMenuItem.Name = "settingsMenuItem";
-            this.settingsMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.settingsMenuItem.Size = new System.Drawing.Size(116, 22);
             this.settingsMenuItem.Text = "Settings";
             this.settingsMenuItem.Click += new System.EventHandler(this.settingsMenuItem_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(113, 6);
             // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(116, 22);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
             // 
@@ -165,14 +144,13 @@ namespace HomeSync.Client {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(293, 258);
-            this.Controls.Add(this.brokerRecordingsLabel);
+            this.ClientSize = new System.Drawing.Size(293, 192);
             this.Controls.Add(this.serverAddressLabel);
             this.Controls.Add(this.serverAddressTextbox);
-            this.Controls.Add(this.brokerRecordingsCheckbox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.homesyncLabel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Settings";
             this.Text = "HomeSync";
@@ -191,10 +169,8 @@ namespace HomeSync.Client {
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel serverStatus;
-        private System.Windows.Forms.CheckBox brokerRecordingsCheckbox;
         private System.Windows.Forms.TextBox serverAddressTextbox;
         private System.Windows.Forms.Label serverAddressLabel;
-        private System.Windows.Forms.Label brokerRecordingsLabel;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem settingsMenuItem;
