@@ -50,7 +50,7 @@ namespace HomeSync.Classes.Network {
                     }
 
                     // Show the data on the console.  
-                    System.Diagnostics.Debug.WriteLine("Text received : {0}", data);
+                    System.Diagnostics.Debug.WriteLine($"Text received: {data}");
 
                     // Process Data
                     ProcessRequest(data, client);
