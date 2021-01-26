@@ -64,6 +64,15 @@ namespace HomeSync.Client {
             #endregion ########################################################
 
 
+            #region Register Client ###########################################
+
+            // Create Network Client
+            NetworkClient client = new NetworkClient();
+            client.Register();
+
+            #endregion ########################################################
+
+
             #region Run Application ###########################################
 
             Application.EnableVisualStyles();

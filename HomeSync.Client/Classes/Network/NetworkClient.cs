@@ -47,6 +47,15 @@ namespace HomeSync.Classes.Network {
             }
         }
 
+        public void Register() {
+            // Encode the data string into a byte array.  
+            byte[] msg = Encoding.ASCII.GetBytes($"RegisterClient|<EOF>");
+            // Send Data through Socket and Return Bytes Sent
+            int sentBytes = socket.Send(msg);
+            // Response from Server
+            string response = Receive();
+        }
+
         public string Send(string data) {
             // Encode the data string into a byte array.  
             byte[] msg = Encoding.ASCII.GetBytes($"{data}<EOF>");
@@ -64,7 +73,7 @@ namespace HomeSync.Classes.Network {
 
             System.Diagnostics.Debug.WriteLine($"Socket Sent {sentBytes} Bytes");
 
-            // Return the response from Server
+            // Response from Server
             string response = Receive();
         }
 

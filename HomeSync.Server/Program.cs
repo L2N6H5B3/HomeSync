@@ -128,6 +128,7 @@ namespace HomeSync.Server {
 
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients()) {
+                System.Diagnostics.Debug.WriteLine($"Sending to Client {clientIp}");
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp);
                 client.SendResumeUpdate(recordingsJsonString);
