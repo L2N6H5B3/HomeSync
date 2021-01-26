@@ -15,6 +15,8 @@ namespace HomeSync.Server {
             
         }
 
+        delegate void SetStatusCallback(string text);
+
         public void SetStatus(string text) {
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
