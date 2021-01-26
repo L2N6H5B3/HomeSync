@@ -74,7 +74,7 @@ namespace HomeSync.Classes.Network {
                     log.WriteLine("NetworkServer: HomeSyncServer Disconnected");
 
                     // Process Data
-                    ProcessRequest(data, client);
+                    ProcessRequest(data);
                 }
 
             } catch (Exception e) {
@@ -82,7 +82,7 @@ namespace HomeSync.Classes.Network {
             }
         }
 
-        private void ProcessRequest(string data, Socket client) {
+        private void ProcessRequest(string data) {
             // Split Message
             string[] dataArray = data.Split('|');
 

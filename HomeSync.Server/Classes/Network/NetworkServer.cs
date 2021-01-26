@@ -89,7 +89,7 @@ namespace HomeSync.Classes.Network {
                     log.WriteLine("NetworkServer: HomeSyncClient Disconnected");
 
                     // Process Data
-                    ProcessRequest(data, client);
+                    ProcessRequest(data, clientAddress);
                 }
 
             }
@@ -103,11 +103,9 @@ namespace HomeSync.Classes.Network {
             return clients;
         }
 
-        private void ProcessRequest(string data, Socket client) {
+        private void ProcessRequest(string data, string clientAddress) {
             // Split Message
             string[] dataArray = data.Split('|');
-            // Get Client IP Address
-            string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
 
             // Create new Response Args
             ResponseArgs args = new ResponseArgs();
