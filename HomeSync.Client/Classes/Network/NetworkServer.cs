@@ -9,6 +9,7 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkServer {
 
+        private Log log;
         private string data = null;
         private Socket socket;
         private IPHostEntry ipHostInfo;
@@ -16,7 +17,10 @@ namespace HomeSync.Classes.Network {
         private IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
 
-        public NetworkServer() {
+        public NetworkServer(Log log) {
+
+            this.log = log;
+
             // Establish the local endpoint for the socket.  
             ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             ipAddress = ipHostInfo.AddressList.First(xx => xx.AddressFamily == AddressFamily.InterNetwork);

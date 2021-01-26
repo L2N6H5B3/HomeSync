@@ -10,12 +10,14 @@ using Newtonsoft.Json;
 using HomeSync.Classes.Recording;
 using HomeSync.Classes.Network;
 using System.Threading;
+using HomeSync.Classes;
 
 namespace HomeSync.Client {
 
 
     static class Program {
 
+        private static Log log;
         private static Settings settings;
         private static ObjectStore TVstore;
         private static Library TVlibrary;
@@ -26,6 +28,9 @@ namespace HomeSync.Client {
         /// </summary>
         [STAThread]
         static void Main() {
+
+            log = new Log();
+            log.WriteLine("-----");
 
             #region Open WMC ObjectStore ######################################
 
@@ -69,7 +74,9 @@ namespace HomeSync.Client {
                 Thread.CurrentThread.IsBackground = true;
 
                 // Create Network Client
-                NetworkClient client = new NetworkClient();
+                NetworkClient client = new NetworkClient(log);
+                // Write to Log
+                log.WriteLine("NetworkClient Connecting");
                 // Set current status in Form
                 settings.SetStatus("Connecting");
                 // Connect Client
@@ -77,9 +84,13 @@ namespace HomeSync.Client {
 
                 // Continue to Attempt to connect Client
                 while (!client.IsConnected()) {
+                    // Write to Log
+                    log.WriteLine("NetworkClient Disconnected");
                     // Set current status in Form
                     settings.SetStatus("Disconnected");
                     Thread.Sleep(10000);
+                    // Write to Log
+                    log.WriteLine("NetworkClient Connecting");
                     // Set current status in Form
                     settings.SetStatus("Connecting");
                     client.Connect();
@@ -87,13 +98,15 @@ namespace HomeSync.Client {
 
                 // If Client is Connected
                 if (client.IsConnected()) {
+                    // Write to Log
+                    log.WriteLine("NetworkClient Connected");
                     // Set current status in Form
                     settings.SetStatus("Connected");
                     // Register Client
                     client.Register();
                 }
 
-                server = new NetworkServer();
+                server = new NetworkServer(log);
                 server.ResponseEvent += Server_ResponseEvent;
                 server.Start();
 
@@ -141,6 +154,8 @@ namespace HomeSync.Client {
 
         // Send a Specific Recording's Resume Point to Server
         private static void SendResumeUpdate(Recording libraryRecording) {
+            // Write to Log
+            log.WriteLine($"Synchronising Resume Position: {libraryRecording.Program.Title}");
             // Set current status in Form
             settings.SetStatus("Syncing resume position");
             // Create RecordingsJson Object
@@ -160,22 +175,28 @@ namespace HomeSync.Client {
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
             
             // Create Network Client
-            NetworkClient client = new NetworkClient();
+            NetworkClient client = new NetworkClient(log);
             // Connect Client
             client.Connect();
             // Send Resume Request to Server
             client.SendResumeUpdate(recordingsJsonString);
+            // Write to Log
+            log.WriteLine($"Synchronised Resume Position: {libraryRecording.Program.Title}");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
 
         // Receive a Resume Point Update from Server
         private static void ReceiveResumeUpdate(RecordingsJson received) {
+            // Write to Log
+            log.WriteLine("Processing Resume Position");
             // Set current status in Form
             settings.SetStatus("Processing resume position");
             var libraryRecordings = TVlibrary.Recordings;
             int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
+                // Write to Log
+                log.WriteLine($"Processing Recording ({currentIndex} of {received.recordingEntries.Count}): {entry.programTitle}");
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
@@ -189,6 +210,8 @@ namespace HomeSync.Client {
                 )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
                 currentIndex++;
             }
+            // Write to Log
+            log.WriteLine("Finished Processing Resume Positions");
             // Set current status in Form
             settings.SetStatus("Ready");
         }

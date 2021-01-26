@@ -9,12 +9,15 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkClient {
 
+        private Log log;
         private Socket socket;
         private IPAddress ipAddress;
         private IPEndPoint remoteEndPoint;
         private byte[] bytes;
 
-        public NetworkClient() {
+        public NetworkClient(Log log) {
+
+            this.log = log;
 
             // Data buffer for incoming data.  
             bytes = new byte[1024];
@@ -27,7 +30,8 @@ namespace HomeSync.Classes.Network {
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 
             } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.ToString());
+                // Write to Log
+                log.WriteLine($"NetworkClient Exception: {e}");
             }
         }
 
@@ -40,14 +44,17 @@ namespace HomeSync.Classes.Network {
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
 
-                System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket Connected");
+                System.Diagnostics.Debug.WriteLine("ServerSocket: Socket Connected");
 
             } catch (ArgumentNullException ane) {
-                System.Diagnostics.Debug.WriteLine($"ServerSocket: ArgumentNullException: {ane}");
+                // Write to Log
+                log.WriteLine($"NetworkClient ArgumentNullException: {ane}");
             } catch (SocketException se) {
-                System.Diagnostics.Debug.WriteLine($"ServerSocket: SocketException: {se}");
+                // Write to Log
+                log.WriteLine($"NetworkClient SocketException: {se}");
             } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine($"ServerSocket: Unexpected exception: {e}");
+                // Write to Log
+                log.WriteLine($"NetworkClient Unexpected Exception: {e}");
             }
         }
 
@@ -56,18 +63,22 @@ namespace HomeSync.Classes.Network {
             byte[] msg = Encoding.ASCII.GetBytes($"RegisterClient|<EOF>");
             // Send Data through Socket and Return Bytes Sent
             int sentBytes = socket.Send(msg);
+
+            // Write to Log
+            log.WriteLine($"NetworkClient Sent RegisterClient (Bytes: {sentBytes})");
+
             // Response from Server
             string response = Receive();
         }
 
-        public string Send(string data) {
-            // Encode the data string into a byte array.  
-            byte[] msg = Encoding.ASCII.GetBytes($"{data}<EOF>");
-            // Send Data through Socket and Return Bytes Sent
-            int sentBytes = socket.Send(msg);
-            // Return the response from Server
-            return Receive();
-        }
+        //public string Send(string data) {
+        //    // Encode the data string into a byte array.  
+        //    byte[] msg = Encoding.ASCII.GetBytes($"{data}<EOF>");
+        //    // Send Data through Socket and Return Bytes Sent
+        //    int sentBytes = socket.Send(msg);
+        //    // Return the response from Server
+        //    return Receive();
+        //}
 
         public void SendResumeUpdate(string data) {
             // Encode the data string into a byte array.  
@@ -75,7 +86,8 @@ namespace HomeSync.Classes.Network {
             // Send Data through Socket and Return Bytes Sent
             int sentBytes = socket.Send(msg);
 
-            System.Diagnostics.Debug.WriteLine($"ServerSocket: Server Sent {sentBytes} Bytes");
+            // Write to Log
+            log.WriteLine($"NetworkClient Sent ResumeUpdate (Bytes: {sentBytes})");
 
             // Response from Server
             string response = Receive();
@@ -87,7 +99,8 @@ namespace HomeSync.Classes.Network {
             // Convert Bytes into String Response
             string response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-            System.Diagnostics.Debug.WriteLine($"ServerSocket: Response: {response}");
+            // Write to Log
+            log.WriteLine($"NetworkClient Received: {response}");
 
             // Close Socket
             Close();
@@ -100,7 +113,8 @@ namespace HomeSync.Classes.Network {
             // Release the socket.
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
-            System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket Closed");
+            // Write to Log
+            log.WriteLine("NetworkClient Socket Closed");
         }
 
         public bool IsConnected() {

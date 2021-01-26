@@ -87,6 +87,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Log.cs" />
     <Compile Include="Classes\Network\NetworkClient.cs" />
     <Compile Include="Classes\Network\NetworkServer.cs" />
     <Compile Include="Classes\Recording\RecordingsJson.cs" />
