@@ -40,7 +40,7 @@ namespace HomeSync.Classes.Network {
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
 
-                System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket connected to {socket.RemoteEndPoint}");
+                System.Diagnostics.Debug.WriteLine($"ServerSocket: Socket Connected");
 
             } catch (ArgumentNullException ane) {
                 System.Diagnostics.Debug.WriteLine($"ServerSocket: ArgumentNullException: {ane}");
@@ -100,6 +100,7 @@ namespace HomeSync.Classes.Network {
             // Release the socket.
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
+            System.Diagnostics.Debug.WriteLine($"ClientSocket: Socket Closed");
         }
 
         public bool IsConnected() {
