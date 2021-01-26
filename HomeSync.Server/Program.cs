@@ -223,7 +223,7 @@ namespace HomeSync.Server {
                     xx.FileSize == entry.fileSize &&
                     xx.StartTime == entry.startTime &&
                     xx.EndTime == entry.endTime
-                ).SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
                 currentIndex++;
             }
             // Set current status in Form
