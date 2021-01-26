@@ -55,6 +55,7 @@ namespace HomeSync.Server {
             #region Start Server ##############################################
 
             new Thread(() => {
+                // Set Thread to Background
                 Thread.CurrentThread.IsBackground = true;
 
                 server = new NetworkServer();
@@ -93,6 +94,10 @@ namespace HomeSync.Server {
 
         private static void Server_ResponseEvent(object sender, ResponseArgs e) {
             switch (e.responseType) {
+                case "RegisterClient":
+                    // Send All Resume Points to Client
+                    SendAllResumePoints(e.clientIp);
+                    break;
                 case "ResumeUpdate":
                     // Receive the Resume Update
                     ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response.Replace("<EOF>","")));
@@ -108,6 +113,38 @@ namespace HomeSync.Server {
 
         #region Resume Update #################################################
 
+        // Send all Resume Points to a new Client
+        private static void SendAllResumePoints(string clientIp) {
+            // Get list of Recordings
+            var libraryRecordings = TVlibrary.Recordings;
+            // Create RecordingsJson Object
+            RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
+            // Iterate through all Recordings
+            foreach (Recording libraryRecording in libraryRecordings) {
+                // Add RecordingEntry to RecordingsJson
+                recordingsJson.recordingEntries.Add(new RecordingEntry {
+                    programTitle = libraryRecording.Program.Title,
+                    programEpisodeTitle = libraryRecording.Program.EpisodeTitle,
+                    programSeasonNumber = libraryRecording.Program.SeasonNumber,
+                    programEpisodeNumber = libraryRecording.Program.EpisodeNumber,
+                    fileSize = libraryRecording.FileSize,
+                    startTime = libraryRecording.StartTime,
+                    endTime = libraryRecording.EndTime,
+                    resumePoint = libraryRecording.GetBookmark("MCE_shell").ToString()
+                });
+            }
+            
+            // Serialise RecordingsJson to String
+            string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
+
+            System.Diagnostics.Debug.WriteLine($"Sending Resume Points to Client {clientIp}");
+            // Create Network Client
+            NetworkClient client = new NetworkClient(clientIp);
+            // Send Resume Request to Client
+            client.SendResumeUpdate(recordingsJsonString);
+        }
+
+        // Send a Specific Recording's Resume Point to all Clients
         private static void SendResumeUpdate(Recording libraryRecording) {
             // Create RecordingsJson Object
             RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
@@ -131,19 +168,23 @@ namespace HomeSync.Server {
                 System.Diagnostics.Debug.WriteLine($"Sending to Client {clientIp}");
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp);
+                // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
         }
 
+        // Distribute a Resume Point Update made by a Client to all Other Clients
         private static void DistributeResumeUpdate(string recordingsJsonString, string fromIp) {
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients().Where(xx => xx != fromIp)) {
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp);
+                // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
         }
 
+        // Receive a Resume Point Update made by a Client
         private static void ReceiveResumeUpdate(RecordingsJson received) {
             var libraryRecordings = TVlibrary.Recordings;
             foreach (RecordingEntry entry in received.recordingEntries) {

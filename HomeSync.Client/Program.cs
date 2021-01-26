@@ -53,16 +53,10 @@ namespace HomeSync.Client {
             #endregion ########################################################
 
 
-            #region Register Client ###########################################
-
-            
-
-            #endregion ########################################################
-
-
-            #region Start Server ##############################################
+            #region Register Client and Start Server ##########################
 
             new Thread(() => {
+                // Set Thread to Background
                 Thread.CurrentThread.IsBackground = true;
 
                 // Create Network Client
@@ -74,12 +68,12 @@ namespace HomeSync.Client {
                 // Continue to Attempt to connect Client
                 while (!client.IsConnected()) {
                     Thread.Sleep(10000);
-                    System.Diagnostics.Debug.WriteLine("Connecting Client...");
                     client.Connect();
                     
                 }
+                // If Client is Connected
                 if (client.IsConnected()) {
-                    System.Diagnostics.Debug.WriteLine("Registering Client...");
+                    // Register Client
                     client.Register();
                 }
 
@@ -90,6 +84,8 @@ namespace HomeSync.Client {
             }).Start();
 
             #endregion ########################################################
+
+
 
 
             #region Run Application ###########################################
@@ -132,6 +128,7 @@ namespace HomeSync.Client {
 
         #region Resume Update #################################################
 
+        // Send a Specific Recording's Resume Point to Server
         private static void SendResumeUpdate(Recording libraryRecording) {
             // Create RecordingsJson Object
             RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
@@ -148,8 +145,6 @@ namespace HomeSync.Client {
             });
             // Serialise RecordingsJson to String
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
-            System.Diagnostics.Debug.WriteLine(recordingsJsonString);
-
             
             // Create Network Client
             NetworkClient client = new NetworkClient();
@@ -159,6 +154,7 @@ namespace HomeSync.Client {
             client.SendResumeUpdate(recordingsJsonString);
         }
 
+        // Receive a Resume Point Update from Server
         private static void ReceiveResumeUpdate(RecordingsJson received) {
             var libraryRecordings = TVlibrary.Recordings;
             foreach (RecordingEntry entry in received.recordingEntries) {
