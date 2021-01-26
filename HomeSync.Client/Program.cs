@@ -92,7 +92,7 @@ namespace HomeSync.Client {
             switch (e.responseType) {
                 case "ResumeUpdate":
                     // Receive the Resume Update
-                    ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response));
+                    ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response.Replace("<EOF>", "")));
                     break;
             }
 
