@@ -13,7 +13,7 @@ namespace HomeSync.Classes {
             // Create Log File Name
             string logFileName = "log" + "-" + DateTime.Now.ToString("yyyyMMdd") + "." + "txt";
             // Create Log File Path
-            string logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HomeSync Client");
+            string logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HomeSync Server");
             // Create Log File Directory
             Directory.CreateDirectory(logFilePath);
             // Create StreamWriter Object

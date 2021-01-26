@@ -28,10 +28,9 @@ namespace HomeSync.Classes.Network {
                 ipAddress = IPAddress.Parse(ConfigurationManager.AppSettings.Get("server-address"));
                 // Create a TCP/IP socket
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                
             } catch (Exception e) {
                 // Write to Log
-                log.WriteLine($"NetworkClient Exception: {e}");
+                log.WriteLine($"NetworkClient: Exception: {e}");
             }
         }
 
@@ -43,78 +42,106 @@ namespace HomeSync.Classes.Network {
                 remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
-
-                System.Diagnostics.Debug.WriteLine("ServerSocket: Socket Connected");
-
+                // Write to Log
+                log.WriteLine($"NetworkClient Connect: Connected");
             } catch (ArgumentNullException ane) {
                 // Write to Log
-                log.WriteLine($"NetworkClient ArgumentNullException: {ane}");
+                log.WriteLine($"NetworkClient Connect: ArgumentNullException: {ane}");
             } catch (SocketException se) {
                 // Write to Log
-                log.WriteLine($"NetworkClient SocketException: {se}");
+                log.WriteLine($"NetworkClient Connect: SocketException: {se}");
             } catch (Exception e) {
                 // Write to Log
-                log.WriteLine($"NetworkClient Unexpected Exception: {e}");
+                log.WriteLine($"NetworkClient Connect: Unexpected Exception: {e}");
             }
         }
 
         public void Register() {
-            // Encode the data string into a byte array.  
-            byte[] msg = Encoding.ASCII.GetBytes($"RegisterClient|<EOF>");
-            // Send Data through Socket and Return Bytes Sent
-            int sentBytes = socket.Send(msg);
-
-            // Write to Log
-            log.WriteLine($"NetworkClient Sent RegisterClient (Bytes: {sentBytes})");
-
-            // Response from Server
-            string response = Receive();
+            try {
+                // Encode the data string into a byte array.  
+                byte[] msg = Encoding.ASCII.GetBytes($"RegisterClient|<EOF>");
+                // Send Data through Socket and Return Bytes Sent
+                int sentBytes = socket.Send(msg);
+                // Write to Log
+                log.WriteLine($"NetworkClient: Sent RegisterClient (Bytes: {sentBytes})");
+                // Response from Server
+                string response = Receive();
+            } catch (ArgumentNullException ane) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Register: ArgumentNullException: {ane}");
+            } catch (SocketException se) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Register: SocketException: {se}");
+            } catch (Exception e) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Register: Unexpected Exception: {e}");
+            }
         }
 
-        //public string Send(string data) {
-        //    // Encode the data string into a byte array.  
-        //    byte[] msg = Encoding.ASCII.GetBytes($"{data}<EOF>");
-        //    // Send Data through Socket and Return Bytes Sent
-        //    int sentBytes = socket.Send(msg);
-        //    // Return the response from Server
-        //    return Receive();
-        //}
-
         public void SendResumeUpdate(string data) {
-            // Encode the data string into a byte array.  
-            byte[] msg = Encoding.ASCII.GetBytes($"ResumeUpdate|{data}<EOF>");
-            // Send Data through Socket and Return Bytes Sent
-            int sentBytes = socket.Send(msg);
-
-            // Write to Log
-            log.WriteLine($"NetworkClient Sent ResumeUpdate (Bytes: {sentBytes})");
-
-            // Response from Server
-            string response = Receive();
+            try {
+                // Encode the data string into a byte array.  
+                byte[] msg = Encoding.ASCII.GetBytes($"ResumeUpdate|{data}<EOF>");
+                // Send Data through Socket and Return Bytes Sent
+                int sentBytes = socket.Send(msg);
+                // Write to Log
+                log.WriteLine($"NetworkClient: Sent ResumeUpdate (Bytes: {sentBytes})");
+                // Response from Server
+                string response = Receive();
+            } catch (ArgumentNullException ane) {
+                // Write to Log
+                log.WriteLine($"NetworkClient SendResumeUpdate: ArgumentNullException: {ane}");
+            } catch (SocketException se) {
+                // Write to Log
+                log.WriteLine($"NetworkClient SendResumeUpdate: SocketException: {se}");
+            } catch (Exception e) {
+                // Write to Log
+                log.WriteLine($"NetworkClient SendResumeUpdate: Unexpected Exception: {e}");
+            }
         }
 
         private string Receive() {
-            // Receive Bytes from Socket
-            int bytesRec = socket.Receive(bytes);
-            // Convert Bytes into String Response
-            string response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-
-            // Write to Log
-            log.WriteLine($"NetworkClient Received: {response}");
-
-            // Close Socket
-            Close();
-
-            // Return Response
+            string response = "";
+            try {
+                // Receive Bytes from Socket
+                int bytesRec = socket.Receive(bytes);
+                // Convert Bytes into String Response
+                response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                // Write to Log
+                log.WriteLine($"NetworkClient: Received data {response}");
+                // Close Socket
+                Close();
+            } catch (ArgumentNullException ane) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Receive: ArgumentNullException: {ane}");
+            } catch (SocketException se) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Receive: SocketException: {se}");
+            } catch (Exception e) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Receive: Unexpected Exception: {e}");
+            }
+            // Return Response from Server
             return response;
         }
 
         private void Close() {
-            // Release the socket.
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
-            // Write to Log
-            log.WriteLine("NetworkClient Socket Closed");
+            try {
+                // Release the socket
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+                // Write to Log
+                log.WriteLine("NetworkClient: Socket Closed");
+            } catch (ArgumentNullException ane) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Close: ArgumentNullException: {ane}");
+            } catch (SocketException se) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Close: SocketException: {se}");
+            } catch (Exception e) {
+                // Write to Log
+                log.WriteLine($"NetworkClient Close: Unexpected Exception: {e}");
+            }
         }
 
         public bool IsConnected() {

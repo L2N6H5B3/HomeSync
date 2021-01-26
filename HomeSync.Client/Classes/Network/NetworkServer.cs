@@ -41,12 +41,17 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    System.Diagnostics.Debug.WriteLine("ClientSocket: Socket Ready");
-                    // Program is suspended while waiting for an incoming connection.  
+                    // Write to Log
+                    log.WriteLine("NetworkServer: Socket Listening");
+                    // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;
+                    // Get Client IP Address
+                    string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
+                    // Write to Log
+                    log.WriteLine($"NetworkServer: HomeSyncServer {clientAddress} Connected");
 
-                    // An incoming connection needs to be processed.  
+                    // An incoming connection needs to be processed
                     while (true) {
                         int bytesRec = client.Receive(bytes);
                         data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
@@ -54,9 +59,8 @@ namespace HomeSync.Classes.Network {
                             break;
                         }
                     }
-
-                    // Show the data on the console.  
-                    System.Diagnostics.Debug.WriteLine($"ClientSocket: Received: {data} from Server");
+                    // Write to Log
+                    log.WriteLine($"NetworkServer: HomeSyncServer {clientAddress} sent: {data}");
 
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("ok");
@@ -66,12 +70,11 @@ namespace HomeSync.Classes.Network {
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
-
-                    System.Diagnostics.Debug.WriteLine("ClientSocket: Socket Closed");
+                    // Write to Log
+                    log.WriteLine("NetworkServer: HomeSyncServer Disconnected");
 
                     // Process Data
                     ProcessRequest(data, client);
-                    
                 }
 
             } catch (Exception e) {

@@ -10,12 +10,14 @@ using Newtonsoft.Json;
 using HomeSync.Classes.Recording;
 using HomeSync.Classes.Network;
 using System.Threading;
+using HomeSync.Classes;
 
 namespace HomeSync.Server {
 
 
     static class Program {
 
+        private static Log log;
         private static Settings settings;
         private static ObjectStore TVstore;
         private static Library TVlibrary;
@@ -26,6 +28,14 @@ namespace HomeSync.Server {
         /// </summary>
         [STAThread]
         static void Main() {
+
+            #region Initialise Log ############################################
+
+            // Create Log Object
+            log = new Log();
+
+            #endregion ########################################################
+
 
             #region Open WMC ObjectStore ######################################
 
@@ -43,10 +53,14 @@ namespace HomeSync.Server {
             clientId = Convert.ToBase64String(managed.ComputeHash(buffer));
             string FriendlyName = Encoding.ASCII.GetString(bytes);
             string DisplayName = clientId;
+            // Write to Log
+            log.WriteLine("Opening WMC Store");
             // Get TVStore
             TVstore = ObjectStore.Open("", FriendlyName, DisplayName, true);
             // Create TVLibrary
             TVlibrary = new Library(TVstore, true, false);
+            // Write to Log
+            log.WriteLine("Listening for WMC Store Updates");
             // Add Store Listener
             TVstore.StoredObjectUpdated += TVstore_StoredObjectUpdated;
 
@@ -67,13 +81,16 @@ namespace HomeSync.Server {
             new Thread(() => {
                 // Set Thread to Background
                 Thread.CurrentThread.IsBackground = true;
-
-                server = new NetworkServer();
+                // Create new Server
+                server = new NetworkServer(log);
+                // Add Event Handler for Server Response
                 server.ResponseEvent += Server_ResponseEvent;
+                // Write to Log
+                log.WriteLine("NetworkServer: Starting");
                 // Set current status in Form
                 settings.SetStatus("Ready");
+                // Start Server
                 server.Start();
-
             }).Start();
 
             #endregion ########################################################
@@ -125,6 +142,8 @@ namespace HomeSync.Server {
 
         // Send all Resume Points to a new Client
         private static void SendAllResumePoints(string clientIp) {
+            // Write to Log
+            log.WriteLine($"Syncronising all resume positions to client {clientIp}");
             // Set current status in Form
             settings.SetStatus("Syncing all resume positions");
             // Get list of Recordings
@@ -149,17 +168,20 @@ namespace HomeSync.Server {
             // Serialise RecordingsJson to String
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
 
-            System.Diagnostics.Debug.WriteLine($"Sending Resume Points to Client {clientIp}");
             // Create Network Client
             NetworkClient client = new NetworkClient(clientIp);
             // Send Resume Request to Client
             client.SendResumeUpdate(recordingsJsonString);
+            // Write to Log
+            log.WriteLine($"Sent all resume positions to client {clientIp}");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
 
         // Send a Specific Recording's Resume Point to all Clients
         private static void SendResumeUpdate(Recording libraryRecording) {
+            // Write to Log
+            log.WriteLine($"Syncronising resume position: {libraryRecording.Program.Title}");
             // Set current status in Form
             settings.SetStatus("Syncing resume position");
             // Create RecordingsJson Object
@@ -198,7 +220,7 @@ namespace HomeSync.Server {
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients().Where(xx => xx != fromIp)) {
                 // Create Network Client
-                NetworkClient client = new NetworkClient(clientIp);
+                NetworkClient client = new NetworkClient(clientIp, log);
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
@@ -208,11 +230,15 @@ namespace HomeSync.Server {
 
         // Receive a Resume Point Update made by a Client
         private static void ReceiveResumeUpdate(RecordingsJson received) {
+            // Write to Log
+            log.WriteLine("Processing resume positions");
             // Set current status in Form
             settings.SetStatus("Processing resume position");
             var libraryRecordings = TVlibrary.Recordings;
             int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
+                // Write to Log
+                log.WriteLine($"Processing recording ({currentIndex} of {received.recordingEntries.Count}): {entry.programTitle}");
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
@@ -226,6 +252,8 @@ namespace HomeSync.Server {
                 )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
                 currentIndex++;
             }
+            // Write to Log
+            log.WriteLine("processed resume positions");
             // Set current status in Form
             settings.SetStatus("Ready");
         }

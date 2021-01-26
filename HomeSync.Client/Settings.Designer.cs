@@ -37,6 +37,8 @@ namespace HomeSync.Client {
             this.settingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.versionLabel = new System.Windows.Forms.Label();
+            this.aboutLabel = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -86,7 +88,7 @@ namespace HomeSync.Client {
             // serverAddressTextbox
             // 
             this.serverAddressTextbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serverAddressTextbox.Location = new System.Drawing.Point(128, 71);
+            this.serverAddressTextbox.Location = new System.Drawing.Point(128, 93);
             this.serverAddressTextbox.Name = "serverAddressTextbox";
             this.serverAddressTextbox.Size = new System.Drawing.Size(153, 21);
             this.serverAddressTextbox.TabIndex = 4;
@@ -95,7 +97,7 @@ namespace HomeSync.Client {
             // 
             this.serverAddressLabel.AutoSize = true;
             this.serverAddressLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serverAddressLabel.Location = new System.Drawing.Point(16, 72);
+            this.serverAddressLabel.Location = new System.Drawing.Point(16, 94);
             this.serverAddressLabel.Name = "serverAddressLabel";
             this.serverAddressLabel.Size = new System.Drawing.Size(106, 15);
             this.serverAddressLabel.TabIndex = 5;
@@ -138,6 +140,28 @@ namespace HomeSync.Client {
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
             // 
+            // versionLabel
+            // 
+            this.versionLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.versionLabel.Location = new System.Drawing.Point(13, 34);
+            this.versionLabel.Name = "versionLabel";
+            this.versionLabel.Size = new System.Drawing.Size(268, 13);
+            this.versionLabel.TabIndex = 7;
+            this.versionLabel.Text = "Version 1.0";
+            this.versionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // aboutLabel
+            // 
+            this.aboutLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.aboutLabel.Location = new System.Drawing.Point(13, 50);
+            this.aboutLabel.Name = "aboutLabel";
+            this.aboutLabel.Size = new System.Drawing.Size(268, 40);
+            this.aboutLabel.TabIndex = 6;
+            this.aboutLabel.Text = "Syncronise Windows Media Center recording and playback over the network";
+            this.aboutLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -150,6 +174,8 @@ namespace HomeSync.Client {
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.homesyncLabel);
+            this.Controls.Add(this.versionLabel);
+            this.Controls.Add(this.aboutLabel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Settings";
@@ -176,6 +202,8 @@ namespace HomeSync.Client {
         private System.Windows.Forms.ToolStripMenuItem settingsMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
+        private System.Windows.Forms.Label versionLabel;
+        private System.Windows.Forms.Label aboutLabel;
     }
 }
 

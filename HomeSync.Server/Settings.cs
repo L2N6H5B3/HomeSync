@@ -55,6 +55,5 @@ namespace HomeSync.Server {
             Show();
             WindowState = FormWindowState.Normal;
         }
-
     }
 }

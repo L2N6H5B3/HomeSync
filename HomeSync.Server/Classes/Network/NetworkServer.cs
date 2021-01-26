@@ -9,6 +9,7 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkServer {
 
+        private Log log;
         private string data = null;
         private bool listening = false;
         private Socket socket;
@@ -18,7 +19,10 @@ namespace HomeSync.Classes.Network {
         private IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
 
-        public NetworkServer() {
+        public NetworkServer(Log log) {
+
+            this.log = log;
+
             // Establish the local endpoint for the socket.  
             ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             ipAddress = ipHostInfo.AddressList.First(xx => xx.AddressFamily == AddressFamily.InterNetwork);
@@ -43,26 +47,25 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    System.Diagnostics.Debug.WriteLine("ServerSocket: Socket Ready");
-                    // Program is suspended while waiting for an incoming connection.  
+                    // Write to Log
+                    log.WriteLine("NetworkServer: Socket Listening");
+                    // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;
-
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
-
-
                     // If Client IP is not in Registered Clients
                     if (!clients.Contains(clientAddress)) {
                         // Add Client IP to Registered Clients
                         clients.Add(clientAddress);
-                        System.Diagnostics.Debug.WriteLine($"ServerSocket: New Client Connected: {clientAddress}");
+                        // Write to Log
+                        log.WriteLine($"NetworkServer: New HomeSyncClient {clientAddress} Connected");
                     } else {
-                        System.Diagnostics.Debug.WriteLine($"ServerSocket: Old Client Connected: {clientAddress}");
-
+                        // Write to Log
+                        log.WriteLine($"NetworkServer: Existing HomeSyncClient {clientAddress} Connected");
                     }
 
-                    // An incoming connection needs to be processed.  
+                    // An incoming connection needs to be processed
                     while (true) {
                         int bytesRec = client.Receive(bytes);
                         data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
@@ -71,17 +74,22 @@ namespace HomeSync.Classes.Network {
                         }
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"ServerSocket: Received {data} from {clientAddress}");
+                    // Write to Log
+                    log.WriteLine($"NetworkServer: HomeSyncClient {clientAddress} sent: {data}");
 
-                    // Process Data
-                    ProcessRequest(data, client);
+                    // Convert OK Data
+                    byte[] msg = Encoding.ASCII.GetBytes("ok");
+                    // Send OK to Client
+                    client.Send(msg);
 
-                    System.Diagnostics.Debug.WriteLine("ServerSocket: Socket Closed");
-
-                    listening = false;
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
+                    // Write to Log
+                    log.WriteLine("NetworkServer: HomeSyncClient Disconnected");
+
+                    // Process Data
+                    ProcessRequest(data, client);
                 }
 
             }
@@ -100,11 +108,6 @@ namespace HomeSync.Classes.Network {
             string[] dataArray = data.Split('|');
             // Get Client IP Address
             string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
-
-            // Convert OK Data
-            byte[] msg = Encoding.ASCII.GetBytes("ok");
-            // Send OK to Client
-            client.Send(msg);
 
             // Create new Response Args
             ResponseArgs args = new ResponseArgs();
