@@ -113,7 +113,6 @@ namespace HomeSync.Server {
             var recording = libraryRecordings.FirstOrDefault(xx => xx.Id == e.ObjectId);
             // If Recording Exists
             if (recording != null) {
-                System.Diagnostics.Debug.WriteLine("Updating Recording Resume Time");
                 // Send the Resume Point Update
                 SendResumeUpdate(recording);
             }
@@ -169,7 +168,7 @@ namespace HomeSync.Server {
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
 
             // Create Network Client
-            NetworkClient client = new NetworkClient(clientIp);
+            NetworkClient client = new NetworkClient(clientIp, log);
             // Send Resume Request to Client
             client.SendResumeUpdate(recordingsJsonString);
             // Write to Log
@@ -199,16 +198,18 @@ namespace HomeSync.Server {
             });
             // Serialise RecordingsJson to String
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
-            System.Diagnostics.Debug.WriteLine(recordingsJsonString);
 
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients()) {
-                System.Diagnostics.Debug.WriteLine($"Sending to Client {clientIp}");
+                // Write to Log
+                log.WriteLine($"Contacting client: {clientIp}");
                 // Create Network Client
-                NetworkClient client = new NetworkClient(clientIp);
+                NetworkClient client = new NetworkClient(clientIp, log);
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
+            // Write to Log
+            log.WriteLine($"Syncronised {libraryRecording.Program.Title} resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -219,11 +220,15 @@ namespace HomeSync.Server {
             settings.SetStatus("Distributing resume position");
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients().Where(xx => xx != fromIp)) {
+                // Write to Log
+                log.WriteLine($"Contacting client: {clientIp}");
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp, log);
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
+            // Write to Log
+            log.WriteLine($"Distributed resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -253,7 +258,7 @@ namespace HomeSync.Server {
                 currentIndex++;
             }
             // Write to Log
-            log.WriteLine("processed resume positions");
+            log.WriteLine("Processed resume positions");
             // Set current status in Form
             settings.SetStatus("Ready");
         }

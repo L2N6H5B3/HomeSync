@@ -188,7 +188,7 @@ namespace HomeSync.Client {
             });
             // Serialise RecordingsJson to String
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
-            
+
             // Create Network Client
             NetworkClient client = new NetworkClient(log);
             // Connect Client
