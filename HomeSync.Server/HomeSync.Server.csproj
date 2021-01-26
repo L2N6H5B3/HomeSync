@@ -35,11 +35,11 @@
     <StartupObject>HomeSync.Server.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="mcepg, Version=6.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="mcepg, Version=6.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Windows\ehome\mcepg.dll</HintPath>
     </Reference>
-    <Reference Include="mcstore, Version=6.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="mcstore, Version=6.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Windows\ehome\mcstore.dll</HintPath>
     </Reference>

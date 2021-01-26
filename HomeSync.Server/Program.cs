@@ -53,14 +53,16 @@ namespace HomeSync.Server {
 
 
             #region Start Server ##############################################
-            
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
+            server = new NetworkServer();
+            server.ResponseEvent += Server_ResponseEvent;
+            server.Start();
 
-                server = new NetworkServer();
-                server.ResponseEvent += Server_ResponseEvent;
-            }).Start();
+            //new Thread(() =>
+            //{
+            //    Thread.CurrentThread.IsBackground = true;
+
+                
+            //}).Start();
 
             #endregion ########################################################
 
@@ -96,7 +98,7 @@ namespace HomeSync.Server {
             switch (e.responseType) {
                 case "ResumeUpdate":
                     // Receive the Resume Update
-                    ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response));
+                    ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response.Replace("<EOF>","")));
                     // Distribute the Resume Update to all Clients
                     DistributeResumeUpdate(e.response, e.clientIp);
                     break;
@@ -147,7 +149,7 @@ namespace HomeSync.Server {
         private static void ReceiveResumeUpdate(RecordingsJson received) {
             var libraryRecordings = TVlibrary.Recordings;
             foreach (RecordingEntry entry in received.recordingEntries) {
-                libraryRecordings.FirstOrDefault(xx =>
+                Recording rec = libraryRecordings.FirstOrDefault(xx =>
                     xx.Program.Title == entry.programTitle &&
                     xx.Program.EpisodeTitle == entry.programEpisodeTitle &&
                     xx.Program.SeasonNumber == entry.programSeasonNumber &&
@@ -155,7 +157,12 @@ namespace HomeSync.Server {
                     xx.FileSize == entry.fileSize &&
                     xx.StartTime == entry.startTime &&
                     xx.EndTime == entry.endTime
-                ).SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                );
+                if (rec != null) {
+                    System.Diagnostics.Debug.WriteLine($"Found Recording: {rec.Program.Title}");
+                    rec.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                }
+                
             }
         }
 
