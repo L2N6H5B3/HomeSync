@@ -33,14 +33,14 @@ namespace HomeSync.Classes.Network {
                     // Connect the Socket
                     socket.Connect(remoteEndPoint);
 
-                    System.Diagnostics.Debug.WriteLine("Socket connected to {0}", socket.RemoteEndPoint.ToString());
+                    System.Diagnostics.Debug.WriteLine($"Socket connected to {socket.RemoteEndPoint}");
 
                 } catch (ArgumentNullException ane) {
-                    System.Diagnostics.Debug.WriteLine("ArgumentNullException : {0}", ane.ToString());
+                    System.Diagnostics.Debug.WriteLine($"ArgumentNullException : {ane}");
                 } catch (SocketException se) {
-                    System.Diagnostics.Debug.WriteLine("SocketException : {0}", se.ToString());
+                    System.Diagnostics.Debug.WriteLine($"SocketException : {se}");
                 } catch (Exception e) {
-                    System.Diagnostics.Debug.WriteLine("Unexpected exception : {0}", e.ToString());
+                    System.Diagnostics.Debug.WriteLine($"Unexpected exception : {e}");
                 }
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.ToString());
@@ -52,7 +52,7 @@ namespace HomeSync.Classes.Network {
             byte[] msg = Encoding.ASCII.GetBytes($"{data}<EOF>");
             // Send Data through Socket and Return Bytes Sent
             int sentBytes = socket.Send(msg);
-            // Return the response from
+            // Return the response from Server
             return Receive();
         }
 
@@ -61,7 +61,10 @@ namespace HomeSync.Classes.Network {
             byte[] msg = Encoding.ASCII.GetBytes($"ResumeUpdate|{data}<EOF>");
             // Send Data through Socket and Return Bytes Sent
             int sentBytes = socket.Send(msg);
-            // Return the response from
+
+            System.Diagnostics.Debug.WriteLine($"Socket Sent {sentBytes} Bytes");
+
+            // Return the response from Server
             string response = Receive();
         }
 

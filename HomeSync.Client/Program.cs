@@ -77,9 +77,6 @@ namespace HomeSync.Client {
         #region Event Handlers ################################################
 
         private static void TVstore_StoredObjectUpdated(object sender, StoredObjectEventArgs e) {
-
-            System.Diagnostics.Debug.WriteLine("StoredObjectUpdated.");
-
             // Get list of Recordings
             var libraryRecordings = TVlibrary.Recordings;
             // Check if Object ID matches a Recording
