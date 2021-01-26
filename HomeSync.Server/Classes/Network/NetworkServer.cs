@@ -101,6 +101,11 @@ namespace HomeSync.Classes.Network {
             // Get Client IP Address
             string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
 
+            // Convert OK Data
+            byte[] msg = Encoding.ASCII.GetBytes("ok");
+            // Send OK to Client
+            client.Send(msg);
+
             // Create new Response Args
             ResponseArgs args = new ResponseArgs();
             // Set the Response Args Response Data
@@ -109,11 +114,6 @@ namespace HomeSync.Classes.Network {
             args.clientIp = clientAddress;
             // Raise Response Event
             ResponseEvent(this, args);
-
-            // Convert OK Data
-            byte[] msg = Encoding.ASCII.GetBytes("ok");
-            // Send OK to Client
-            client.Send(msg);
         }
 
         public bool IsListening() {
