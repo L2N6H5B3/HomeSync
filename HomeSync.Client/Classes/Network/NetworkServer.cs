@@ -42,14 +42,14 @@ namespace HomeSync.Classes.Network {
                 // Start listening for connections
                 while (true) {
                     // Write to Log
-                    log.WriteLine("NetworkServer: Socket Listening");
+                    log.WriteLine("Waiting for HomeSync Server connections");
                     // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
                     // Write to Log
-                    log.WriteLine($"NetworkServer: HomeSyncServer ({clientAddress}) Connected");
+                    log.WriteLine($"HomeSync Server ({clientAddress}) Connected");
 
                     // An incoming connection needs to be processed
                     while (true) {
@@ -60,10 +60,10 @@ namespace HomeSync.Classes.Network {
                         }
                     }
                     // Write to Log
-                    log.WriteLine($"NetworkServer: HomeSyncServer ({clientAddress}) sent: {data.Split('|')[0]}");
+                    log.WriteLine($"HomeSync Server ({clientAddress}) sent: {data.Split('|')[0]}");
 
                     // Convert OK Data
-                    byte[] msg = Encoding.ASCII.GetBytes("ok");
+                    byte[] msg = Encoding.ASCII.GetBytes("OK");
                     // Send OK to Client
                     client.Send(msg);
 
@@ -71,7 +71,7 @@ namespace HomeSync.Classes.Network {
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
                     // Write to Log
-                    log.WriteLine("NetworkServer: HomeSyncServer ({clientAddress}) Disconnected");
+                    log.WriteLine($"HomeSync Server ({clientAddress}) Disconnected");
 
                     // Process Data
                     ProcessRequest(data);

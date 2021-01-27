@@ -111,8 +111,6 @@ namespace HomeSync.Client {
                 server = new NetworkServer(log);
                 // Add Event Handler for Server Response
                 server.ResponseEvent += Server_ResponseEvent;
-                // Write to Log
-                log.WriteLine("NetworkServer: Starting");
                 // Set current status in Form
                 settings.SetStatus("Ready");
                 // Start Server
@@ -203,7 +201,7 @@ namespace HomeSync.Client {
             int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
                 // Write to Log
-                log.WriteLine($"Processing recording ({currentIndex} of {received.recordingEntries.Count}): {entry.programTitle}");
+                log.WriteLine($"Processing recording ({currentIndex} of {received.recordingEntries.Count}): \"{entry.programTitle}\"");
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>

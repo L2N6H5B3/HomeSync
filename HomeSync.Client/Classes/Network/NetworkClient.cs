@@ -41,11 +41,11 @@ namespace HomeSync.Classes.Network {
                 // Set Remote EndPoint
                 remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
                 // Write to Log
-                log.WriteLine("NetworkClient: Connecting");
+                log.WriteLine("Connecting to HomeSync Server");
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
                 // Write to Log
-                log.WriteLine($"NetworkClient: Connected");
+                log.WriteLine($"Connected to HomeSync Server");
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Connect: ArgumentNullException: {ane}");
@@ -65,7 +65,7 @@ namespace HomeSync.Classes.Network {
                 // Send Data through Socket and Return Bytes Sent
                 int sentBytes = socket.Send(msg);
                 // Write to Log
-                log.WriteLine($"NetworkClient: Sent RegisterClient (Bytes: {sentBytes})");
+                log.WriteLine($"Sent RegisterClient ({sentBytes} bytes) to HomeSync Server");
                 // Response from Server
                 string response = Receive();
             } catch (ArgumentNullException ane) {
@@ -87,7 +87,7 @@ namespace HomeSync.Classes.Network {
                 // Send Data through Socket and Return Bytes Sent
                 int sentBytes = socket.Send(msg);
                 // Write to Log
-                log.WriteLine($"NetworkClient: Sent ResumeUpdate (Bytes: {sentBytes})");
+                log.WriteLine($"Sent ResumeUpdate ({sentBytes} bytes) to HomeSync Server");
                 // Response from Server
                 string response = Receive();
             } catch (ArgumentNullException ane) {
@@ -110,7 +110,7 @@ namespace HomeSync.Classes.Network {
                 // Convert Bytes into String Response
                 response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
                 // Write to Log
-                log.WriteLine($"NetworkClient: Received data {response}");
+                log.WriteLine($"Received {response} from HomeSync Server");
                 // Close Socket
                 Close();
             } catch (ArgumentNullException ane) {
@@ -133,7 +133,7 @@ namespace HomeSync.Classes.Network {
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
                 // Write to Log
-                log.WriteLine("NetworkClient: Socket Closed");
+                log.WriteLine("Disconnected from HomeSync Server");
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Close: ArgumentNullException: {ane}");
