@@ -9,7 +9,7 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkServer {
 
-        private Log log;
+        private readonly Log log;
         private string data = null;
         private Socket socket;
         private IPHostEntry ipHostInfo;
@@ -41,8 +41,6 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    // Write to Log
-                    log.WriteLine("Waiting for HomeSync Server connections");
                     // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;

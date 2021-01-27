@@ -164,7 +164,7 @@ namespace HomeSync.Server {
             // If there is a pending Client Retry
             if (retry != null) {
                 // Create RecordingsJson Object
-                RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
+                RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = retry.recordingEntries };
                 // Remove Old Retry
                 retryList.Remove(retry);
                 // Retry ResumeUpdate

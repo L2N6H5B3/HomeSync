@@ -47,8 +47,6 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    // Write to Log
-                    log.WriteLine("Waiting for HomeSync Client connections");
                     // Set Status
                     RefreshServerStatus("Listening");
                     // Program is suspended while waiting for an incoming connection

@@ -18,6 +18,7 @@ namespace HomeSync.Client {
     static class Program {
 
         private static Log log;
+        private static Retry retry;
         private static Settings settings;
         private static ObjectStore TVstore;
         private static Library TVlibrary;
@@ -29,10 +30,12 @@ namespace HomeSync.Client {
         [STAThread]
         static void Main() {
 
-            #region Initialise Log ############################################
+            #region Initialise Variables ######################################
 
             // Create Log Object
             log = new Log();
+            // Create Retry Object
+            retry = new Retry();
 
             #endregion ########################################################
 
@@ -84,6 +87,10 @@ namespace HomeSync.Client {
 
                 // Create Network Client
                 NetworkClient client = new NetworkClient(log);
+                // Add Event Handler for Server Retry
+                client.RetryEvent += Client_RetryEvent;
+                // Add Event Handler for Server Heartbeat
+                client.HeartbeatEvent += Client_HeartbeatEvent;
                 // Set current status in Form
                 settings.SetStatus("Connecting");
                 // Connect Client
@@ -149,7 +156,23 @@ namespace HomeSync.Client {
                     ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response.Replace("<EOF>", "")));
                     break;
             }
+        }
 
+        private static void Client_RetryEvent(object sender, RetryArgs e) {
+            // Add new RecordingEntries to the Retry
+            retry.Add(e.data);
+        }
+
+        private static void Client_HeartbeatEvent(object sender, EventArgs e) {
+            // Check if there is a pending Server Retry
+            if (retry.recordingEntries.Count > 0) {
+                // Create RecordingsJson Object
+                RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = retry.recordingEntries };
+                // Reset Retry RecordingEntry List
+                retry.recordingEntries = new List<RecordingEntry>();
+                // Retry ResumeUpdate
+                RetryResumeUpdate(JsonConvert.SerializeObject(recordingsJson));
+            }
         }
 
         #endregion ############################################################
@@ -187,6 +210,22 @@ namespace HomeSync.Client {
             client.SendResumeUpdate(recordingsJsonString);
             // Write to Log
             log.WriteLine($"Synchronised resume position: {libraryRecording.Program.Title}");
+            // Set current status in Form
+            settings.SetStatus("Ready");
+        }
+
+        // Retry Distribution of Resume Point Update
+        private static void RetryResumeUpdate(string recordingsJsonString) {
+            // Set current status in Form
+            settings.SetStatus("Syncing resume position");
+            // Create Network Client
+            NetworkClient client = new NetworkClient(log);
+            // Add Client RetryEvent Handler
+            client.RetryEvent += Client_RetryEvent;
+            // Send Resume Request to Server
+            client.SendResumeUpdate(recordingsJsonString);
+            // Write to Log
+            log.WriteLine($"Sent retry resume positions to Server");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
