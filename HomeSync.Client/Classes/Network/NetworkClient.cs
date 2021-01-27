@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace HomeSync.Classes.Network {
     class NetworkClient {
@@ -14,6 +15,7 @@ namespace HomeSync.Classes.Network {
         private IPAddress ipAddress;
         private IPEndPoint remoteEndPoint;
         private byte[] bytes;
+        private Thread HeartbeatThread;
 
         public NetworkClient(Log log) {
 
@@ -68,6 +70,8 @@ namespace HomeSync.Classes.Network {
                 log.WriteLine($"Sent RegisterClient ({sentBytes} bytes) to HomeSync Server");
                 // Response from Server
                 string response = Receive();
+                // Create Heartbeat
+                CreateHeartbeat();
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Register: ArgumentNullException: {ane}");
@@ -148,6 +152,55 @@ namespace HomeSync.Classes.Network {
 
         public bool IsConnected() {
             return socket.Connected;
+        }
+
+        private void CreateHeartbeat() {
+            // Create Heartbeat Thread
+            HeartbeatThread = new Thread(() => {
+                // Set Thread to Background
+                Thread.CurrentThread.IsBackground = true;
+                // While True
+                while (true) {
+                    // Sleep the Thread for one minute
+                    Thread.Sleep(60000);
+                    // If the socket is disconnected and not in use
+                    if (!socket.Connected) {
+                        // Connect the socket
+                        Connect();
+                        // If the socket is connected
+                        if (socket.Connected) {
+                            // Encode the data string into a byte array.  
+                            byte[] msg = Encoding.ASCII.GetBytes($"Heartbeat|<EOF>");
+                            // Send Data through Socket and Return Bytes Sent
+                            int sentBytes = socket.Send(msg);
+                            // Write to Log
+                            log.WriteLine($"Sent Heartbeat ({sentBytes} bytes) to HomeSync Server");
+
+                            try {
+                                // Receive Bytes from Socket
+                                int bytesRec = socket.Receive(bytes);
+                                // Convert Bytes into String Response
+                                string response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                                // Write to Log
+                                log.WriteLine($"Received Heartbeat {response} from HomeSync Server");
+                                // Close Socket
+                                Close();
+                            } catch (ArgumentNullException ane) {
+                                // Write to Log
+                                log.WriteLine($"NetworkClient Receive: ArgumentNullException: {ane}");
+                            } catch (SocketException se) {
+                                // Write to Log
+                                log.WriteLine($"NetworkClient Receive: SocketException: {se}");
+                            } catch (Exception e) {
+                                // Write to Log
+                                log.WriteLine($"NetworkClient Receive: Unexpected Exception: {e}");
+                            }
+                        }
+                    }
+                }
+            });
+            // Start the Heartbeat Thread
+            HeartbeatThread.Start();
         }
     }
 }
