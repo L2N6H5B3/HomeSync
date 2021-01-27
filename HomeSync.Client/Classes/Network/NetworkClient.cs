@@ -17,7 +17,8 @@ namespace HomeSync.Classes.Network {
         private IPEndPoint remoteEndPoint;
         private Thread HeartbeatThread;
         public event EventHandler<RetryArgs> RetryEvent;
-        public event EventHandler HeartbeatEvent;
+        public event EventHandler<StatusArgs> StatusEvent;
+        public event EventHandler ServerConnectEvent;
 
         public NetworkClient(Log log) {
             // Add Log
@@ -34,18 +35,22 @@ namespace HomeSync.Classes.Network {
                 remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
                 // Create a TCP/IP socket
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                // Write to Log
-                log.WriteLine("Connecting to Server");
+                // Set current status in Form
+                SetConnectionStatus("Connecting");
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
                 // Write to Log
-                log.WriteLine($"Connected to Server");
+                log.WriteLine($"Server Connected");
+                // Set current status in Form
+                SetConnectionStatus("Connected");
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Connect: ArgumentNullException: {ane}");
-            } catch (SocketException se) {
+            } catch (SocketException) {
                 // Write to Log
-                log.WriteLine($"NetworkClient Connect: SocketException: {se}");
+                log.WriteLine($"Server Connection Failed");
+                // Set Status
+                SetConnectionStatus("Disconnected");
             } catch (Exception e) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Connect: Unexpected Exception: {e}");
@@ -53,13 +58,15 @@ namespace HomeSync.Classes.Network {
         }
 
         public void Register() {
+            // Trigger Server Connected Updates
+            ServerConnected();
             try {
                 // Encode the data string into a byte array.  
                 byte[] msg = Encoding.ASCII.GetBytes($"RegisterClient|<EOF>");
                 // Send Data through Socket and Return Bytes Sent
                 int sentBytes = socket.Send(msg);
                 // Write to Log
-                log.WriteLine($"Sent RegisterClient ({sentBytes} bytes) to Server");
+                log.WriteLine($"Registering Client");
                 // Response from Server
                 string response = Receive();
                 // Create Heartbeat
@@ -67,9 +74,9 @@ namespace HomeSync.Classes.Network {
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Register: ArgumentNullException: {ane}");
-            } catch (SocketException se) {
+            } catch (SocketException) {
                 // Write to Log
-                log.WriteLine($"NetworkClient Register: SocketException: {se}");
+                log.WriteLine($"Registering Client Failed");
             } catch (Exception e) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Register: Unexpected Exception: {e}");
@@ -83,22 +90,22 @@ namespace HomeSync.Classes.Network {
                 // Send Data through Socket and Return Bytes Sent
                 int sentBytes = socket.Send(msg);
                 // Write to Log
-                log.WriteLine($"Sent ResumeUpdate ({sentBytes} bytes) to Server");
+                log.WriteLine($"Sending Resume Update");
                 // Response from Server
                 string response = Receive();
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient SendResumeUpdate: ArgumentNullException: {ane}");
-            } catch (SocketException se) {
+            } catch (SocketException) {
                 // Write to Log
-                log.WriteLine($"NetworkClient SendResumeUpdate: SocketException: {se}");
+                log.WriteLine($"Sending Resume Update Failed");
                 // Create new Response Args
                 RetryArgs args = new RetryArgs {
                     // Set the StatusArgs Response Data
                     data = data
                 };
                 // Write to Log
-                log.WriteLine($"Unable to contact Server ({ConfigurationManager.AppSettings.Get("server-address")}), adding to RetryLater List");
+                log.WriteLine($"Unable to contact Server, will retry later");
                 // Raise Response Event
                 RetryEvent(this, args);
             } catch (Exception e) {
@@ -114,8 +121,6 @@ namespace HomeSync.Classes.Network {
                 int bytesRec = socket.Receive(bytes);
                 // Convert Bytes into String Response
                 response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                // Write to Log
-                log.WriteLine($"Received {response} from Server");
                 // Close Socket
                 Close();
             } catch (ArgumentNullException ane) {
@@ -137,8 +142,6 @@ namespace HomeSync.Classes.Network {
                 // Release the socket
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
-                // Write to Log
-                log.WriteLine("Disconnected from Server");
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Close: ArgumentNullException: {ane}");
@@ -170,33 +173,27 @@ namespace HomeSync.Classes.Network {
                         Connect();
                         // If the socket is connected
                         if (socket.Connected) {
+                            // Set Status
+                            SetConnectionStatus("Ready");
                             try {
                                 // Encode the data string into a byte array.  
                                 byte[] msg = Encoding.ASCII.GetBytes($"Heartbeat|<EOF>");
                                 // Send Data through Socket and Return Bytes Sent
                                 int sentBytes = socket.Send(msg);
                                 // Write to Log
-                                log.WriteLine($"Sent Heartbeat ({sentBytes} bytes) to Server");
+                                log.WriteLine($"Sent Heartbeat");
                                 // Receive Bytes from Socket
                                 int bytesRec = socket.Receive(bytes);
                                 // Convert Bytes into String Response
                                 string response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                                // Write to Log
-                                log.WriteLine($"Received Heartbeat {response} from Server");
                                 // Close Socket
                                 Close();
-                                // Create new HeartbeatArgs
-                                HeartbeatArgs args = new HeartbeatArgs();
-                                // Set the ResponseArgs Response Data
-                                args.serverHeartbeat = true;
-                                // Raise Response Event
-                                HeartbeatEvent(this, args);
                             } catch (ArgumentNullException ane) {
                                 // Write to Log
                                 log.WriteLine($"NetworkClient Receive: ArgumentNullException: {ane}");
-                            } catch (SocketException se) {
+                            } catch (SocketException) {
                                 // Write to Log
-                                log.WriteLine($"NetworkClient Receive: SocketException: {se}");
+                                log.WriteLine("Sending Heartbeat Failed");
                             } catch (Exception e) {
                                 // Write to Log
                                 log.WriteLine($"NetworkClient Receive: Unexpected Exception: {e}");
@@ -208,13 +205,35 @@ namespace HomeSync.Classes.Network {
             // Start the Heartbeat Thread
             HeartbeatThread.Start();
         }
+        private void SetConnectionStatus(string status) {
+            // Create new Response Args
+            StatusArgs args = new StatusArgs();
+            // Set the StatusArgs Response Data
+            args.status = status;
+            // Raise Response Event
+            StatusEvent(this, args);
+        }
+
+        private void ServerConnected() {
+            // Create new ServerConnectArgs
+            ServerConnectArgs args = new ServerConnectArgs();
+            // Set the ResponseArgs Response Data
+            args.serverAvailable = true;
+            // Raise Response Event
+            ServerConnectEvent(this, args);
+        }
     }
+
     class RetryArgs : EventArgs {
         public string data;
     }
 
-    class HeartbeatArgs : EventArgs {
-        public bool serverHeartbeat;
+    class StatusArgs : EventArgs {
+        public string status;
+    }
+
+    class ServerConnectArgs : EventArgs {
+        public bool serverAvailable;
     }
 }
 

@@ -46,8 +46,6 @@ namespace HomeSync.Classes.Network {
                     data = null;
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
-                    // Write to Log
-                    log.WriteLine($"HomeSync Server ({clientAddress}) Connected");
 
                     // An incoming connection needs to be processed
                     while (true) {
@@ -58,7 +56,7 @@ namespace HomeSync.Classes.Network {
                         }
                     }
                     // Write to Log
-                    log.WriteLine($"HomeSync Server ({clientAddress}) sent: {data.Split('|')[0]}");
+                    log.WriteLine($"Server Sent {data.Split('|')[0]}");
 
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("OK");
@@ -68,8 +66,6 @@ namespace HomeSync.Classes.Network {
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
-                    // Write to Log
-                    log.WriteLine($"HomeSync Server ({clientAddress}) Disconnected");
 
                     // Process Data
                     ProcessRequest(data);

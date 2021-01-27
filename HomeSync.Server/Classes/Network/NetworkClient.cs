@@ -84,7 +84,7 @@ namespace HomeSync.Classes.Network {
                 args.clientAddress = clientAddress;
                 args.data = data;
                 // Write to Log
-                log.WriteLine($"Unable to contact Client ({clientAddress}), adding to RetryLater List");
+                log.WriteLine($"Unable to contact Client ({clientAddress}), will retry later");
                 // Raise Response Event
                 RetryEvent(this, args);
             } catch (Exception e) {

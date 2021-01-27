@@ -92,8 +92,6 @@ namespace HomeSync.Server {
                 server.StatusEvent += Server_StatusEvent;
                 // Add Event Handler for Client Heartbeat
                 server.HeartbeatEvent += Server_HeartbeatEvent;
-                // Write to Log
-                log.WriteLine("NetworkServer: Starting");
                 // Set current status in Form
                 settings.SetStatus("Ready");
                 // Start Server
@@ -179,8 +177,6 @@ namespace HomeSync.Server {
 
         // Send all Resume Points to a new Client
         private static void SendAllResumePoints(string clientIp) {
-            // Write to Log
-            log.WriteLine($"Syncronising all resume positions to client {clientIp}");
             // Set current status in Form
             settings.SetStatus("Syncing all resume positions");
             // Get list of Recordings
@@ -212,7 +208,7 @@ namespace HomeSync.Server {
             // Send Resume Request to Client
             client.SendResumeUpdate(recordingsJsonString);
             // Write to Log
-            log.WriteLine($"Sent all resume positions to client {clientIp}");
+            log.WriteLine($"Client ({clientIp}) Resume Positions Syncronised");
             // Set current status in Form
             settings.SetStatus("Ready");
         }

@@ -47,6 +47,8 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
+                    // Write to Log
+                    log.WriteLine($"Listening for Clients");
                     // Set Status
                     RefreshServerStatus("Listening");
                     // Program is suspended while waiting for an incoming connection
@@ -56,7 +58,7 @@ namespace HomeSync.Classes.Network {
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
                     // Write to Log
-                    log.WriteLine($"HomeSync Client ({clientAddress}) Connected");
+                    log.WriteLine($"Client ({clientAddress}) Connected ");
                     // Set Status
                     RefreshServerStatus("Connected");
                     // If Client IP is not in Registered Clients
@@ -64,7 +66,7 @@ namespace HomeSync.Classes.Network {
                         // Add Client IP to Registered Clients
                         clients.Add(clientAddress);
                         // Write to Log
-                        log.WriteLine($"Adding HomeSync Client ({clientAddress}) to Known Clients List");
+                        log.WriteLine($"Client ({clientAddress}) Added to Known Clients List");
                     }
 
                     // An incoming connection needs to be processed
@@ -80,7 +82,7 @@ namespace HomeSync.Classes.Network {
                     string clientIntent = data.Split('|')[0];
 
                     // Write to Log
-                    log.WriteLine($"HomeSync Client ({clientAddress}) sent: {clientIntent}");
+                    log.WriteLine($"Client ({clientAddress}) Intent: {clientIntent}");
 
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("OK");
@@ -90,8 +92,6 @@ namespace HomeSync.Classes.Network {
                     // Close Client Socket
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
-                    // Write to Log
-                    log.WriteLine($"HomeSync Client ({clientAddress}) Disconnected");
 
                     // If the Client Intent is not Heartbeat
                     if (clientIntent != "Heartbeat") {
