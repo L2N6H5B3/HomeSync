@@ -18,6 +18,7 @@ namespace HomeSync.Classes.Network {
         private IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
         public event EventHandler<StatusArgs> StatusEvent;
+        public event EventHandler<HeartbeatArgs> HeartbeatEvent;
 
         public NetworkServer(Log log) {
 
@@ -98,6 +99,13 @@ namespace HomeSync.Classes.Network {
                     if (clientIntent != "Heartbeat") {
                         // Process Data
                         ProcessRequest(data, clientAddress);
+                    } else {
+                        // Create new HeartbeatArgs
+                        HeartbeatArgs args = new HeartbeatArgs();
+                        // Set the ResponseArgs Response Data
+                        args.clientIp = clientAddress;
+                        // Raise Response Event
+                        HeartbeatEvent(this, args);
                     }
                 }
 
@@ -146,6 +154,10 @@ namespace HomeSync.Classes.Network {
 
     class StatusArgs : EventArgs {
         public string status;
+    }
+
+    class HeartbeatArgs : EventArgs {
+        public string clientIp;
     }
 }
 

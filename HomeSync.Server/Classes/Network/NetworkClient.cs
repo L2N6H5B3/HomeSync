@@ -11,13 +11,17 @@ namespace HomeSync.Classes.Network {
 
         private Log log;
         private string hostname;
+        private string clientAddress;
         private Socket socket;
         private IPAddress ipAddress;
         private IPEndPoint remoteEndPoint;
         private byte[] bytes;
+        public event EventHandler<RetryArgs> RetryEvent;
 
-        public NetworkClient(string address, Log log) {
-
+        public NetworkClient(string clientAddress, Log log) {
+            // Add Client IP Address
+            this.clientAddress = clientAddress;
+            // Add Log
             this.log = log;
 
             // Data buffer for incoming data.  
@@ -28,7 +32,7 @@ namespace HomeSync.Classes.Network {
                 // Get Hostname
                 hostname = Dns.GetHostName();
                 // Set IP Address
-                ipAddress = IPAddress.Parse(address);
+                ipAddress = IPAddress.Parse(clientAddress);
                 // Set Remote EndPoint
                 remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
 
@@ -74,6 +78,15 @@ namespace HomeSync.Classes.Network {
             } catch (SocketException se) {
                 // Write to Log
                 log.WriteLine($"NetworkClient SendResumeUpdate: SocketException: {se}");
+                // Create new Response Args
+                RetryArgs args = new RetryArgs();
+                // Set the StatusArgs Response Data
+                args.clientAddress = clientAddress;
+                args.data = data;
+                // Write to Log
+                log.WriteLine($"Unable to contact ({clientAddress}), adding to RetryLater List");
+                // Raise Response Event
+                RetryEvent(this, args);
             } catch (Exception e) {
                 // Write to Log
                 log.WriteLine($"NetworkClient SendResumeUpdate: Unexpected Exception: {e}");
@@ -123,6 +136,11 @@ namespace HomeSync.Classes.Network {
                 log.WriteLine($"NetworkClient Close: Unexpected Exception: {e}");
             }
         }
+    }
+
+    class RetryArgs : EventArgs {
+        public string clientAddress;
+        public string data;
     }
 }
 

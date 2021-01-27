@@ -18,6 +18,7 @@ namespace HomeSync.Server {
     static class Program {
 
         private static Log log;
+        private static List<Retry> retryList;
         private static Settings settings;
         private static ObjectStore TVstore;
         private static Library TVlibrary;
@@ -29,10 +30,12 @@ namespace HomeSync.Server {
         [STAThread]
         static void Main() {
 
-            #region Initialise Log ############################################
+            #region Initialise Variables ######################################
 
             // Create Log Object
             log = new Log();
+            // Create RetryList Object
+            retryList = new List<Retry>();
 
             #endregion ########################################################
 
@@ -87,6 +90,8 @@ namespace HomeSync.Server {
                 server.ResponseEvent += Server_ResponseEvent;
                 // Add Event Handler for Server Status
                 server.StatusEvent += Server_StatusEvent;
+                // Add Event Handler for Client Heartbeat
+                server.HeartbeatEvent += Server_HeartbeatEvent;
                 // Write to Log
                 log.WriteLine("NetworkServer: Starting");
                 // Set current status in Form
@@ -140,6 +145,33 @@ namespace HomeSync.Server {
             settings.SetStatus(e.status);
         }
 
+        private static void Client_RetryEvent(object sender, RetryArgs e) {
+            // Check if there is a pending Client Retry
+            Retry retry = retryList.FirstOrDefault(xx => xx.ipAddress == e.clientAddress);
+            // If there is no Client Retry
+            if (retry == null) {
+                // Add new Retry to the Retry List
+                retryList.Add(new Retry(e.clientAddress, e.data));
+            } else {
+                // Add new data to Retry
+                retry.Add(e.data);
+            }
+        }
+
+        private static void Server_HeartbeatEvent(object sender, HeartbeatArgs e) {
+            // Check if there is a pending Client Retry
+            Retry retry = retryList.FirstOrDefault(xx => xx.ipAddress == e.clientIp);
+            // If there is a pending Client Retry
+            if (retry != null) {
+                // Create RecordingsJson Object
+                RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
+                // Remove Old Retry
+                retryList.Remove(retry);
+                // Retry ResumeUpdate
+                RetryResumeUpdate(JsonConvert.SerializeObject(recordingsJson), retry.ipAddress);
+            }
+        }
+
         #endregion ############################################################
 
 
@@ -175,6 +207,8 @@ namespace HomeSync.Server {
 
             // Create Network Client
             NetworkClient client = new NetworkClient(clientIp, log);
+            // Add Client RetryEvent Handler
+            client.RetryEvent += Client_RetryEvent;
             // Send Resume Request to Client
             client.SendResumeUpdate(recordingsJsonString);
             // Write to Log
@@ -186,7 +220,7 @@ namespace HomeSync.Server {
         // Send a Specific Recording's Resume Point to all Clients
         private static void SendResumeUpdate(Recording libraryRecording) {
             // Write to Log
-            log.WriteLine($"Syncronising resume position: {libraryRecording.Program.Title}");
+            log.WriteLine($"Syncronising resume position: \"{libraryRecording.Program.Title}\"");
             // Set current status in Form
             settings.SetStatus("Syncing resume position");
             // Create RecordingsJson Object
@@ -211,11 +245,13 @@ namespace HomeSync.Server {
                 log.WriteLine($"Contacting client: {clientIp}");
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp, log);
+                // Add Client RetryEvent Handler
+                client.RetryEvent += Client_RetryEvent;
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
             // Write to Log
-            log.WriteLine($"Syncronised {libraryRecording.Program.Title} resume position to all clients");
+            log.WriteLine($"Syncronised \"{libraryRecording.Program.Title}\" resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -230,11 +266,31 @@ namespace HomeSync.Server {
                 log.WriteLine($"Contacting client: {clientIp}");
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp, log);
+                // Add Client RetryEvent Handler
+                client.RetryEvent += Client_RetryEvent;
                 // Send Resume Request to Client
                 client.SendResumeUpdate(recordingsJsonString);
             }
             // Write to Log
             log.WriteLine($"Distributed resume position to all clients");
+            // Set current status in Form
+            settings.SetStatus("Ready");
+        }
+
+        // Retry Distribution of Resume Point Update
+        private static void RetryResumeUpdate(string recordingsJsonString, string clientIp) {
+            // Set current status in Form
+            settings.SetStatus("Distributing resume position");
+            // Write to Log
+            log.WriteLine($"Contacting client: {clientIp}");
+            // Create Network Client
+            NetworkClient client = new NetworkClient(clientIp, log);
+            // Add Client RetryEvent Handler
+            client.RetryEvent += Client_RetryEvent;
+            // Send Resume Request to Client
+            client.SendResumeUpdate(recordingsJsonString);
+            // Write to Log
+            log.WriteLine($"Sent retry resume positions to client {clientIp}");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
