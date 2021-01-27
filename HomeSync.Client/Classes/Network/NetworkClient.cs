@@ -18,22 +18,10 @@ namespace HomeSync.Classes.Network {
         private Thread HeartbeatThread;
 
         public NetworkClient(Log log) {
-
+            // Add Log
             this.log = log;
-
             // Data buffer for incoming data.  
             bytes = new byte[1024];
-
-            // Connect to Device
-            try {
-                // Set IP Address
-                ipAddress = IPAddress.Parse(ConfigurationManager.AppSettings.Get("server-address"));
-                // Create a TCP/IP socket
-                socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            } catch (Exception e) {
-                // Write to Log
-                log.WriteLine($"NetworkClient: Exception: {e}");
-            }
         }
 
         public void Connect() {
@@ -42,6 +30,8 @@ namespace HomeSync.Classes.Network {
                 ipAddress = IPAddress.Parse(ConfigurationManager.AppSettings.Get("server-address"));
                 // Set Remote EndPoint
                 remoteEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
+                // Create a TCP/IP socket
+                socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 // Write to Log
                 log.WriteLine("Connecting to HomeSync Server");
                 // Connect the Socket

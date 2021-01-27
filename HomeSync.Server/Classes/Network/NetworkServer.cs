@@ -93,10 +93,12 @@ namespace HomeSync.Classes.Network {
                     client.Close();
                     // Write to Log
                     log.WriteLine($"HomeSync Client ({clientAddress}) Disconnected");
-                    // Set Status
-                    RefreshServerStatus("Disconnected");
-                    // Process Data
-                    ProcessRequest(data, clientAddress);
+
+                    // If the Client Intent is not Heartbeat
+                    if (clientIntent != "Heartbeat") {
+                        // Process Data
+                        ProcessRequest(data, clientAddress);
+                    }
                 }
 
             }
