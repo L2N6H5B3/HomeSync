@@ -40,12 +40,8 @@ namespace HomeSync.Classes.Network {
                 socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 try {
-                    // Write to Log
-                    log.WriteLine($"Connecting to Client ({clientAddress})");
                     // Connect the Socket
                     socket.Connect(remoteEndPoint);
-                    // Write to Log
-                    log.WriteLine($"Connected to Client ({clientAddress})");
                 } catch (ArgumentNullException ane) {
                     // Write to Log
                     log.WriteLine($"NetworkClient Connect: ArgumentNullException: {ane}");
@@ -100,8 +96,6 @@ namespace HomeSync.Classes.Network {
                 int bytesRec = socket.Receive(bytes);
                 // Convert Bytes into String Response
                 response = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                // Write to Log
-                log.WriteLine($"Received {response} from Client ({clientAddress})");
                 // Close Socket
                 Close();
             } catch (ArgumentNullException ane) {
@@ -123,8 +117,6 @@ namespace HomeSync.Classes.Network {
                 // Release the socket
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
-                // Write to Log
-                log.WriteLine($"Disconnected from Client ({clientAddress})");
             } catch (ArgumentNullException ane) {
                 // Write to Log
                 log.WriteLine($"NetworkClient Close: ArgumentNullException: {ane}");

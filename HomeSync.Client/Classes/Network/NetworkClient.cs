@@ -39,8 +39,6 @@ namespace HomeSync.Classes.Network {
                 SetConnectionStatus("Connecting");
                 // Connect the Socket
                 socket.Connect(remoteEndPoint);
-                // Write to Log
-                log.WriteLine($"Server Connected");
                 // Set current status in Form
                 SetConnectionStatus("Connected");
             } catch (ArgumentNullException ane) {

@@ -128,6 +128,8 @@ namespace HomeSync.Server {
                 case "RegisterClient":
                     // Send All Resume Points to Client
                     SendAllResumePoints(e.clientIp);
+                    // Write to Log
+                    log.WriteLine($"Client ({e.clientIp}) Registered");
                     break;
                 case "ResumeUpdate":
                     // Receive the Resume Update

@@ -81,9 +81,6 @@ namespace HomeSync.Classes.Network {
                     // Get the Client Intent from the Response
                     string clientIntent = data.Split('|')[0];
 
-                    // Write to Log
-                    log.WriteLine($"Client ({clientAddress}) Intent: {clientIntent}");
-
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("OK");
                     // Send OK to Client
