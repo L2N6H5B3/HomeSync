@@ -55,8 +55,6 @@ namespace HomeSync.Classes.Network {
                             break;
                         }
                     }
-                    // Write to Log
-                    log.WriteLine($"Server Sent {data.Split('|')[0]}");
 
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("OK");

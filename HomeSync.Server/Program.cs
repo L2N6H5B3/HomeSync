@@ -239,8 +239,6 @@ namespace HomeSync.Server {
 
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients()) {
-                // Write to Log
-                log.WriteLine($"Contacting client: {clientIp}");
                 // Create Network Client
                 NetworkClient client = new NetworkClient(clientIp, log);
                 // Add Client RetryEvent Handler
@@ -249,7 +247,7 @@ namespace HomeSync.Server {
                 client.SendResumeUpdate(recordingsJsonString);
             }
             // Write to Log
-            log.WriteLine($"Syncronised \"{libraryRecording.Program.Title}\" resume position to all clients");
+            log.WriteLine($"Sent \"{libraryRecording.Program.Title}\" resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -257,7 +255,7 @@ namespace HomeSync.Server {
         // Distribute a Resume Point Update made by a Client to all Other Clients
         private static void DistributeResumeUpdate(string recordingsJsonString, string fromIp) {
             // Set current status in Form
-            settings.SetStatus("Distributing resume position");
+            settings.SetStatus("Forwarding resume position");
             // Iterate through each Client in RegisteredClients
             foreach (string clientIp in server.GetRegisteredClients().Where(xx => xx != fromIp)) {
                 // Write to Log
@@ -270,7 +268,7 @@ namespace HomeSync.Server {
                 client.SendResumeUpdate(recordingsJsonString);
             }
             // Write to Log
-            log.WriteLine($"Distributed resume position to all clients");
+            log.WriteLine($"Forwarded resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }

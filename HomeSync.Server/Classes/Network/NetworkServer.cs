@@ -96,9 +96,10 @@ namespace HomeSync.Classes.Network {
                         ProcessRequest(data, clientAddress);
                     } else {
                         // Create new HeartbeatArgs
-                        HeartbeatArgs args = new HeartbeatArgs();
-                        // Set the ResponseArgs Response Data
-                        args.clientIp = clientAddress;
+                        HeartbeatArgs args = new HeartbeatArgs {
+                            // Set the ResponseArgs Response Data
+                            clientIp = clientAddress
+                        };
                         // Raise Response Event
                         HeartbeatEvent(this, args);
                     }
@@ -122,20 +123,22 @@ namespace HomeSync.Classes.Network {
             string[] dataArray = data.Split('|');
 
             // Create new ResponseArgs
-            ResponseArgs args = new ResponseArgs();
-            // Set the ResponseArgs Response Data
-            args.responseType = dataArray[0];
-            args.response = dataArray[1];
-            args.clientIp = clientAddress;
+            ResponseArgs args = new ResponseArgs {
+                // Set the ResponseArgs Response Data
+                responseType = dataArray[0],
+                response = dataArray[1],
+                clientIp = clientAddress
+            };
             // Raise Response Event
             ResponseEvent(this, args);
         }
 
         private void RefreshServerStatus(string status) {
             // Create new Response Args
-            StatusArgs args = new StatusArgs();
-            // Set the StatusArgs Response Data
-            args.status = status;
+            StatusArgs args = new StatusArgs {
+                // Set the StatusArgs Response Data
+                status = status
+            };
             // Raise Response Event
             StatusEvent(this, args);
         }

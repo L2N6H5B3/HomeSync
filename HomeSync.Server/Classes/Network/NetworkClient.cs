@@ -45,9 +45,9 @@ namespace HomeSync.Classes.Network {
                 } catch (ArgumentNullException ane) {
                     // Write to Log
                     log.WriteLine($"NetworkClient Connect: ArgumentNullException: {ane}");
-                } catch (SocketException se) {
+                } catch (SocketException) {
                     // Write to Log
-                    log.WriteLine($"NetworkClient Connect: SocketException: {se}");
+                    log.WriteLine($"Client Unreachable");
                 } catch (Exception e) {
                     // Write to Log
                     log.WriteLine($"NetworkClient Connect: Unexpected Exception: {e}");

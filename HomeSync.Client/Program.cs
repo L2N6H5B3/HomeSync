@@ -91,15 +91,12 @@ namespace HomeSync.Client {
                 client.RetryEvent += Client_RetryEvent;
                 // Add Event Handler for Connection Status
                 client.StatusEvent += Client_StatusEvent;
-                // Add Event Handler for Server Heartbeat
-                client.ServerConnectEvent += Client_ServerConnectEvent;
                 // Connect Client
-                client.Connect();
-
+                client.Connect(retry);
                 // Continue to Attempt to connect Client
                 while (!client.IsConnected()) {
                     Thread.Sleep(10000);
-                    client.Connect();
+                    client.Connect(retry);
                 }
 
                 // If Client is Connected
@@ -107,6 +104,8 @@ namespace HomeSync.Client {
                     // Register Client
                     client.Register();
                 }
+                // Create Heartbeat
+                client.CreateHeartbeat(retry);
 
                 // Create new Server
                 server = new NetworkServer(log);
@@ -160,21 +159,8 @@ namespace HomeSync.Client {
         }
 
         private static void Client_StatusEvent(object sender, StatusArgs e) {
+            // Set Status
             settings.SetStatus(e.status);
-        }
-
-        private static void Client_ServerConnectEvent(object sender, EventArgs e) {
-            // Check if there is a pending Server Retry
-            if (retry.recordingEntries.Count > 0) {
-                // Write to Log
-                log.WriteLine("Retries Exist, Sending Resume Updates");
-                // Create RecordingsJson Object
-                RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = retry.recordingEntries };
-                // Reset Retry RecordingEntry List
-                retry.recordingEntries = new List<RecordingEntry>();
-                // Retry ResumeUpdate
-                RetryResumeUpdate(JsonConvert.SerializeObject(recordingsJson));
-            }
         }
 
         #endregion ############################################################
@@ -188,6 +174,7 @@ namespace HomeSync.Client {
             log.WriteLine($"Syncronising resume position: \"{libraryRecording.Program.Title}\"");
             // Set current status in Form
             settings.SetStatus("Syncing resume position");
+
             // Create RecordingsJson Object
             RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
             // Add RecordingEntry to RecordingsJson
@@ -211,42 +198,27 @@ namespace HomeSync.Client {
             // Add Event Handler for Connection Status
             client.StatusEvent += Client_StatusEvent;
             // Connect Client
-            client.Connect();
+            client.Connect(retry);
             // Send Resume Request to Server
-            client.SendResumeUpdate(recordingsJsonString);
-            // Write to Log
-            log.WriteLine($"Synchronised resume position: \"{libraryRecording.Program.Title}\"");
-            // Set current status in Form
-            settings.SetStatus("Ready");
-        }
-
-        // Retry Distribution of Resume Point Update
-        private static void RetryResumeUpdate(string recordingsJsonString) {
-            // Set current status in Form
-            settings.SetStatus("Syncing resume position");
-            // Create Network Client
-            NetworkClient client = new NetworkClient(log);
-            // Add Client RetryEvent Handler
-            client.RetryEvent += Client_RetryEvent;
-            // Add Event Handler for Connection Status
-            client.StatusEvent += Client_StatusEvent;
-            // Connect Client
-            client.Connect();
-            // Send Resume Request to Server
-            client.SendResumeUpdate(recordingsJsonString);
-            // Write to Log
-            log.WriteLine($"Sent retry resume positions");
+            bool result = client.SendResumeUpdate(recordingsJsonString);
+            // If the Request Completed Successfully
+            if (result) {
+                // Write to Log
+                log.WriteLine($"Synchronised resume position: \"{libraryRecording.Program.Title}\"");
+            }
             // Set current status in Form
             settings.SetStatus("Ready");
         }
 
         // Receive a Resume Point Update from Server
         private static void ReceiveResumeUpdate(RecordingsJson received) {
+            // Write to Log
+            log.WriteLine($"Setting Resume Points");
             var libraryRecordings = TVlibrary.Recordings;
             int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
                 // Write to Log
-                log.WriteLine($"Processing recording ({currentIndex} of {received.recordingEntries.Count}): \"{entry.programTitle}\"");
+                log.WriteLine($"({currentIndex} of {received.recordingEntries.Count}): \"{entry.programTitle}\"");
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
@@ -260,6 +232,8 @@ namespace HomeSync.Client {
                 )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
                 currentIndex++;
             }
+            // Write to Log
+            log.WriteLine($"Resume Positions Up to Date");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
