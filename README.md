@@ -40,4 +40,4 @@ Below are a few use cases with the example flow of data:
 
 
 ## Troubleshooting
-Both HomeSync Server and HomeSync Client write logs which can be used for troubleshooting of any communication issues or program crashes.  Logs are written to the local user's application data folder: "**AppData\Local\HomeSync <Client / Server>\**".
+Both HomeSync Server and HomeSync Client write logs which can be used for troubleshooting of any communication issues or program crashes.  Logs are written to the local user's application data folder: "AppData\Local\HomeSync <Client / Server>\".
