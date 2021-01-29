@@ -9,12 +9,12 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkServer {
 
-        private readonly Log log;
         private string data = null;
-        private Socket socket;
-        private IPHostEntry ipHostInfo;
-        private IPAddress ipAddress;
-        private IPEndPoint localEndPoint;
+        private readonly Log log;
+        private readonly Socket socket;
+        private readonly IPHostEntry ipHostInfo;
+        private readonly IPAddress ipAddress;
+        private readonly IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
 
         public NetworkServer(Log log) {
@@ -68,9 +68,9 @@ namespace HomeSync.Classes.Network {
                     // Process Data
                     ProcessRequest(data);
                 }
-
             } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.ToString());
+                // Write to Log
+                log.WriteLine($"Unexpected Exception: {e}");
             }
         }
 
@@ -79,10 +79,11 @@ namespace HomeSync.Classes.Network {
             string[] dataArray = data.Split('|');
 
             // Create new ResponseArgs
-            ResponseArgs args = new ResponseArgs();
-            // Set the ResponseArgs Response Data
-            args.responseType = dataArray[0];
-            args.response = dataArray[1];
+            ResponseArgs args = new ResponseArgs {
+                // Set the ResponseArgs Response Data
+                responseType = dataArray[0],
+                response = dataArray[1]
+            };
             // Raise Response Event
             ResponseEvent(this, args);
         }

@@ -9,13 +9,13 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkServer {
 
-        private Log log;
         private string data = null;
-        private Socket socket;
-        private List<string> clients;
-        private IPHostEntry ipHostInfo;
-        private IPAddress ipAddress;
-        private IPEndPoint localEndPoint;
+        private readonly Log log;
+        private readonly Socket socket;
+        private readonly List<string> clients;
+        private readonly IPHostEntry ipHostInfo;
+        private readonly IPAddress ipAddress;
+        private readonly IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
         public event EventHandler<StatusArgs> StatusEvent;
         public event EventHandler<HeartbeatArgs> HeartbeatEvent;
@@ -33,7 +33,7 @@ namespace HomeSync.Classes.Network {
             socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             // Create a RegisteredClients List
-            clients = new List<string>();
+            clients = new List<string> { "10.1.1.100" };
         }
 
         public void Start() {
@@ -104,12 +104,12 @@ namespace HomeSync.Classes.Network {
                         HeartbeatEvent(this, args);
                     }
                 }
-
             }
             catch (Exception e) {
+                // Write to Log
+                log.WriteLine($"Unexpected Exception: {e}");
                 // Set Status
                 RefreshServerStatus("Stopped");
-                System.Diagnostics.Debug.WriteLine(e.ToString());
             }
         }
 

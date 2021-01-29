@@ -12,6 +12,7 @@ namespace HomeSync.Classes {
 
         public Retry(string clientIp, string recordingsJson) {
             ipAddress = clientIp;
+            recordingEntries = new List<RecordingEntry>();
             Add(recordingsJson);
         }
 
@@ -20,24 +21,32 @@ namespace HomeSync.Classes {
             List<RecordingEntry> jsonRecordingEntries = JsonConvert.DeserializeObject<RecordingsJson>(recordingsJson).recordingEntries;
             // Iterate through each RecordingEntry in JSON
             foreach (RecordingEntry jsonRecordingEntry in jsonRecordingEntries) {
-                // Check if a RecordingEntry already exists for this Programme
-                RecordingEntry recordingEntry = recordingEntries.FirstOrDefault(xx =>
-                    xx.programTitle == jsonRecordingEntry.programTitle &&
-                    xx.programEpisodeTitle == jsonRecordingEntry.programEpisodeTitle &&
-                    xx.programSeasonNumber == jsonRecordingEntry.programSeasonNumber &&
-                    xx.programEpisodeNumber == jsonRecordingEntry.programEpisodeNumber &&
-                    xx.startTime == jsonRecordingEntry.startTime &&
-                    xx.endTime == jsonRecordingEntry.endTime
-                );
-                if (recordingEntry == null) {
+                // If there is at least one RecordingEntry
+                if (recordingEntries.Count > 0) {
+                    // Check if a RecordingEntry already exists for this Programme
+                    RecordingEntry recordingEntry = recordingEntries.FirstOrDefault(xx =>
+                        xx.programTitle == jsonRecordingEntry.programTitle &&
+                        xx.programEpisodeTitle == jsonRecordingEntry.programEpisodeTitle &&
+                        xx.programSeasonNumber == jsonRecordingEntry.programSeasonNumber &&
+                        xx.programEpisodeNumber == jsonRecordingEntry.programEpisodeNumber &&
+                        xx.startTime == jsonRecordingEntry.startTime &&
+                        xx.endTime == jsonRecordingEntry.endTime
+                    );
+                    // If the RecordingEntry does not exist
+                    if (recordingEntry == null) {
+                        // Add the RecordingEntry
+                        recordingEntries.Add(jsonRecordingEntry);
+                    } else {
+                        // Remove Old RecordingEntry
+                        recordingEntries.Remove(recordingEntry);
+                        // Add New RecordingEntry
+                        recordingEntries.Add(jsonRecordingEntry);
+                    }
+                } else {
                     // Add the RecordingEntry
                     recordingEntries.Add(jsonRecordingEntry);
-                } else {
-                    // Remove Old RecordingEntry
-                    recordingEntries.Remove(recordingEntry);
-                    // Add New RecordingEntry
-                    recordingEntries.Add(jsonRecordingEntry);
                 }
+                
             }
         }
     }

@@ -14,6 +14,7 @@ namespace HomeSync.Classes {
         }
 
         public Retry(string recordingsJson) {
+            recordingEntries = new List<RecordingEntry>();
             Add(recordingsJson);
         }
 

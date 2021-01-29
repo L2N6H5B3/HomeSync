@@ -208,9 +208,12 @@ namespace HomeSync.Server {
             // Add Client RetryEvent Handler
             client.RetryEvent += Client_RetryEvent;
             // Send Resume Request to Client
-            client.SendResumeUpdate(recordingsJsonString);
-            // Write to Log
-            log.WriteLine($"Client ({clientIp}) Resume Positions Syncronised");
+            bool result = client.SendResumeUpdate(recordingsJsonString);
+            // If the Request Completed Successfully
+            if (result) {
+                // Write to Log
+                log.WriteLine($"Client ({clientIp}) Resume Positions Syncronised");
+            }
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -244,10 +247,13 @@ namespace HomeSync.Server {
                 // Add Client RetryEvent Handler
                 client.RetryEvent += Client_RetryEvent;
                 // Send Resume Request to Client
-                client.SendResumeUpdate(recordingsJsonString);
+                bool result = client.SendResumeUpdate(recordingsJsonString);
+                // If the Request Completed Successfully
+                if (result) {
+                    // Write to Log
+                    log.WriteLine($"Sent \"{libraryRecording.Program.Title}\" resume position to Client ({clientIp})");
+                }
             }
-            // Write to Log
-            log.WriteLine($"Sent \"{libraryRecording.Program.Title}\" resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -265,10 +271,13 @@ namespace HomeSync.Server {
                 // Add Client RetryEvent Handler
                 client.RetryEvent += Client_RetryEvent;
                 // Send Resume Request to Client
-                client.SendResumeUpdate(recordingsJsonString);
+                bool result = client.SendResumeUpdate(recordingsJsonString);
+                // If the Request Completed Successfully
+                if (result) {
+                    // Write to Log
+                    log.WriteLine($"Forwarded resume position to Client ({clientIp})");
+                }
             }
-            // Write to Log
-            log.WriteLine($"Forwarded resume position to all clients");
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -284,9 +293,12 @@ namespace HomeSync.Server {
             // Add Client RetryEvent Handler
             client.RetryEvent += Client_RetryEvent;
             // Send Resume Request to Client
-            client.SendResumeUpdate(recordingsJsonString);
-            // Write to Log
-            log.WriteLine($"Sent retry resume positions to client {clientIp}");
+            bool result = client.SendResumeUpdate(recordingsJsonString);
+            // If the Request Completed Successfully
+            if (result) {
+                // Write to Log
+                log.WriteLine($"Sent retry resume positions to Client ({clientIp})");
+            }
             // Set current status in Form
             settings.SetStatus("Ready");
         }
@@ -294,14 +306,12 @@ namespace HomeSync.Server {
         // Receive a Resume Point Update made by a Client
         private static void ReceiveResumeUpdate(RecordingsJson received) {
             // Write to Log
-            log.WriteLine("Processing resume positions");
-            // Set current status in Form
-            settings.SetStatus("Processing resume position");
+            log.WriteLine($"Setting Resume Points");
             var libraryRecordings = TVlibrary.Recordings;
             int currentIndex = 1;
             foreach (RecordingEntry entry in received.recordingEntries) {
                 // Write to Log
-                log.WriteLine($"Processing recording ({currentIndex} of {received.recordingEntries.Count}): \"{entry.programTitle}\"");
+                log.WriteLine($"({currentIndex} of {received.recordingEntries.Count}): \"{entry.programTitle}\"");
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
@@ -316,7 +326,7 @@ namespace HomeSync.Server {
                 currentIndex++;
             }
             // Write to Log
-            log.WriteLine("Processed resume positions");
+            log.WriteLine($"Resume Positions Up to Date");
             // Set current status in Form
             settings.SetStatus("Ready");
         }

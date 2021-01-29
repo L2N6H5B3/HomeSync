@@ -9,13 +9,12 @@ using System.Text;
 namespace HomeSync.Classes.Network {
     class NetworkClient {
 
-        private Log log;
-        private string hostname;
-        private string clientAddress;
-        private Socket socket;
-        private IPAddress ipAddress;
-        private IPEndPoint remoteEndPoint;
-        private byte[] bytes;
+        private readonly Log log;
+        private readonly string clientAddress;
+        private readonly Socket socket;
+        private readonly IPAddress ipAddress;
+        private readonly IPEndPoint remoteEndPoint;
+        private readonly byte[] bytes;
         public event EventHandler<RetryArgs> RetryEvent;
 
         public NetworkClient(string clientAddress, Log log) {
@@ -29,8 +28,6 @@ namespace HomeSync.Classes.Network {
 
             // Connect to Device
             try {
-                // Get Hostname
-                hostname = Dns.GetHostName();
                 // Set IP Address
                 ipAddress = IPAddress.Parse(clientAddress);
                 // Set Remote EndPoint
@@ -58,7 +55,7 @@ namespace HomeSync.Classes.Network {
             }
         }
 
-        public void SendResumeUpdate(string data) {
+        public bool SendResumeUpdate(string data) {
             try {
                 // Encode the data string into a byte array.  
                 byte[] msg = Encoding.ASCII.GetBytes($"ResumeUpdate|{data}<EOF>");
@@ -68,25 +65,29 @@ namespace HomeSync.Classes.Network {
                 log.WriteLine($"Sent ResumeUpdate ({sentBytes} bytes) to Client ({clientAddress})");
                 // Response from Server
                 string response = Receive();
-            } catch (ArgumentNullException ane) {
+            } catch (SocketException) {
                 // Write to Log
-                log.WriteLine($"NetworkClient SendResumeUpdate: ArgumentNullException: {ane}");
-            } catch (SocketException se) {
-                // Write to Log
-                log.WriteLine($"NetworkClient SendResumeUpdate: SocketException: {se}");
+                log.WriteLine($"Sending Resume Update Failed");
+
                 // Create new Response Args
-                RetryArgs args = new RetryArgs();
-                // Set the StatusArgs Response Data
-                args.clientAddress = clientAddress;
-                args.data = data;
+                RetryArgs args = new RetryArgs {
+                    // Set the StatusArgs Response Data
+                    clientAddress = clientAddress,
+                    data = data
+                };
+
                 // Write to Log
                 log.WriteLine($"Unable to contact Client ({clientAddress}), will retry later");
                 // Raise Response Event
                 RetryEvent(this, args);
+                // Return False to Indicate Failure
+                return false;
             } catch (Exception e) {
                 // Write to Log
                 log.WriteLine($"NetworkClient SendResumeUpdate: Unexpected Exception: {e}");
             }
+            // Return True to Indicate Success
+            return true;
         }
 
         private string Receive() {
