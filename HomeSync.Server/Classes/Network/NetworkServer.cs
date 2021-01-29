@@ -33,7 +33,7 @@ namespace HomeSync.Classes.Network {
             socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             // Create a RegisteredClients List
-            clients = new List<string> { "10.1.1.100" };
+            clients = new List<string>();
         }
 
         public void Start() {
