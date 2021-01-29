@@ -13,7 +13,7 @@ HomeSync is intended to be a "one-stop-shop" to streamline the experience of usi
 * Recording Brokering (from one machine to a main recording machine on the network)
 * XMLTV Guide Import & Distribution
 
-**Future Features:**
+**Future Ideas:**
 * Automatically discover and import Recorded TV Shows and metadata
 * Adopt a Mesh Architecture over the current Client-Server Architecture
 * Implement Resume Point Conflict Resolution
