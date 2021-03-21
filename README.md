@@ -16,7 +16,8 @@ HomeSync is intended to be a "one-stop-shop" to streamline the experience of usi
 **Future Ideas:**
 * Automatically discover and import Recorded TV Shows and metadata
 * Adopt a Mesh Architecture over the current Client-Server Architecture
-* Implement Resume Point Conflict Resolution
+* Implement Resume Point conflict resolution
+* Implement a more advanced programme identification system that will work over recordings of different sizes and lengths
 
 ## Configuration
 HomeSync communicates over TCP port 65430 (this can be changed in the .config file), utilises a typical "client-server" architecture.  Each HomeSync use case requires a server machine (normally the machine running the main Windows Media Center installation, located in the lounge or home theatre), and at least one client machine (bedroom, den, etc).
