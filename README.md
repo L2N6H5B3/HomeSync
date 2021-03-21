@@ -36,7 +36,7 @@ Below are a few use cases with the example flow of data:
   * The recording resume point will be distributed to all clients immediately or when they become available
     * If the client does not become available prior to the server being rebooted, the client will not receive the resume update as this was stored in the buffer in memory, and the client will retain its current restore point unless it is rebooted
 * A recording is partly watched and then stopped on a client
-  * The recording resume point will be sent to the server immediately or when it becomes available, and the server will distribute this update immediate to clients or when they become available
+  * The recording resume point will be sent to the server immediately or when it becomes available, and the server will distribute this update immediately to clients or when they become available
     * If the server does not become available prior to the client being rebooted, the server nor any other clients will not receive the resume update as this was stored in the buffer in memory, and the resume point will be lost
 
 
