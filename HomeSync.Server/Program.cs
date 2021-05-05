@@ -16,7 +16,6 @@ using System.Windows.Forms;
 
 namespace HomeSync.Server {
 
-
     static class Program {
 
         private static Log log;
@@ -135,7 +134,7 @@ namespace HomeSync.Server {
                     break;
                 case "ResumeUpdate":
                     // Receive the Resume Update
-                    ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response.Replace("<EOF>","")));
+                    ReceiveResumeUpdate(JsonConvert.DeserializeObject<RecordingsJson>(e.response.Replace("<EOF>", "")));
                     // Distribute the Resume Update to all Clients
                     DistributeResumeUpdate(e.response, e.clientIp);
                     break;
@@ -202,7 +201,7 @@ namespace HomeSync.Server {
                     resumePoint = libraryRecording.GetBookmark("MCE_shell").ToString()
                 });
             }
-            
+
             // Serialise RecordingsJson to String
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
 
