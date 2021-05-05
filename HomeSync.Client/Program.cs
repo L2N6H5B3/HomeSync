@@ -267,14 +267,28 @@ namespace HomeSync.Client {
             string directory = Path.GetDirectoryName(fileName);
             // Check if Directory exists in WatchedFolders List
             if (!WatchedFolders.Contains(directory)) {
+                // Create List to hold WatchedFolders Values
+                List<string> data = new List<string>();
                 // Get Windows Media Center Recording Key
                 RegistryKey recordingKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Media Center\Service\Recording", true);
-                // Get Data from WatchedFolders Value
-                List<string> data = new List<string>((string[])recordingKey.GetValue("WatchedFolders"));
-                // Check if Directory exists in WatchedFolders Value
-                string location = data.FirstOrDefault(xx => xx.ToLower() == directory.ToLower());
-                // If Directory doesn't exist
-                if (location == null) {
+                // Get WatchedFolders Value
+                var watchedFoldersValue = recordingKey.GetValue("WatchedFolders");
+                // Check if the WatchedFolders Value exists
+                if (watchedFoldersValue != null) {
+                    // Get Data from WatchedFolders Value
+                    data.AddRange((string[])watchedFoldersValue);
+                    // Check if Directory exists in WatchedFolders Value
+                    string location = data.FirstOrDefault(xx => xx.ToLower() == directory.ToLower());
+                    // If Directory doesn't exist
+                    if (location == null) {
+                        // Add Directory
+                        data.Add(directory);
+                        // Synthesise WatchedFolders Value
+                        recordingKey.SetValue("WatchedFolders", data.ToArray());
+                        // Add Directory to WatchedFolders List
+                        WatchedFolders.Add(directory);
+                    }
+                } else {
                     // Add Directory
                     data.Add(directory);
                     // Synthesise WatchedFolders Value
@@ -282,6 +296,7 @@ namespace HomeSync.Client {
                     // Add Directory to WatchedFolders List
                     WatchedFolders.Add(directory);
                 }
+                
                 // Close access to the Registry Key
                 recordingKey.Close();
             }
