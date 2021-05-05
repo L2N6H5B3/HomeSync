@@ -1,16 +1,18 @@
-﻿using Microsoft.MediaCenter.Pvr;
+﻿using HomeSync.Classes;
+using HomeSync.Classes.Network;
+using HomeSync.Classes.Recording;
+using HomeSync.Server.Classes;
+using Microsoft.MediaCenter.Pvr;
 using Microsoft.MediaCenter.Store;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Windows.Forms;
-using Newtonsoft.Json;
-using HomeSync.Classes.Recording;
-using HomeSync.Classes.Network;
 using System.Threading;
-using HomeSync.Classes;
+using System.Windows.Forms;
 
 namespace HomeSync.Server {
 
@@ -193,6 +195,7 @@ namespace HomeSync.Server {
                     programEpisodeTitle = libraryRecording.Program.EpisodeTitle,
                     programSeasonNumber = libraryRecording.Program.SeasonNumber,
                     programEpisodeNumber = libraryRecording.Program.EpisodeNumber,
+                    fileName = GetNetworkPath(libraryRecording.FileName),
                     fileSize = libraryRecording.FileSize,
                     startTime = libraryRecording.StartTime,
                     endTime = libraryRecording.EndTime,
@@ -232,6 +235,7 @@ namespace HomeSync.Server {
                 programEpisodeTitle = libraryRecording.Program.EpisodeTitle,
                 programSeasonNumber = libraryRecording.Program.SeasonNumber,
                 programEpisodeNumber = libraryRecording.Program.EpisodeNumber,
+                fileName = GetNetworkPath(libraryRecording.FileName),
                 fileSize = libraryRecording.FileSize,
                 startTime = libraryRecording.StartTime,
                 endTime = libraryRecording.EndTime,
@@ -315,13 +319,8 @@ namespace HomeSync.Server {
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
-                    xx.Program.Title == entry.programTitle &&
-                    xx.Program.EpisodeTitle == entry.programEpisodeTitle &&
-                    xx.Program.SeasonNumber == entry.programSeasonNumber &&
-                    xx.Program.EpisodeNumber == entry.programEpisodeNumber &&
-                    xx.FileSize == entry.fileSize &&
-                    xx.StartTime == entry.startTime &&
-                    xx.EndTime == entry.endTime
+                    Path.GetFileName(xx.FileName.ToLower()) == Path.GetFileName(entry.fileName.ToLower()) &&
+                    xx.State == RecordingState.Recorded
                 )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
                 currentIndex++;
             }
@@ -333,5 +332,13 @@ namespace HomeSync.Server {
 
         #endregion ############################################################
 
+
+        #region Network Paths #################################################
+
+        public static string GetNetworkPath(string fileName) {
+            return Path.Combine(Utilities.TryGetLocalFromUncDirectory(Path.GetDirectoryName(fileName)), Path.GetFileName(fileName));
+        }
+
+        #endregion ############################################################
     }
 }

@@ -1,16 +1,18 @@
-﻿using Microsoft.MediaCenter.Pvr;
+﻿using HomeSync.Classes;
+using HomeSync.Classes.Network;
+using HomeSync.Classes.Recording;
+using Microsoft.MediaCenter.Pvr;
 using Microsoft.MediaCenter.Store;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Windows.Forms;
-using Newtonsoft.Json;
-using HomeSync.Classes.Recording;
-using HomeSync.Classes.Network;
 using System.Threading;
-using HomeSync.Classes;
+using System.Windows.Forms;
 
 namespace HomeSync.Client {
 
@@ -23,6 +25,7 @@ namespace HomeSync.Client {
         private static ObjectStore TVstore;
         private static Library TVlibrary;
         private static NetworkServer server;
+        private static List<string> WatchedFolders;
 
         /// <summary>
         /// The main entry point for the application.
@@ -36,6 +39,8 @@ namespace HomeSync.Client {
             log = new Log();
             // Create Retry Object
             retry = new Retry();
+            // Create WatchedFolders List
+            WatchedFolders = new List<string>();
 
             #endregion ########################################################
 
@@ -121,14 +126,14 @@ namespace HomeSync.Client {
 
 
             #region Run Application ###########################################
-            
+
             Application.Run(settings);
-            
+
             #endregion ########################################################
 
         }
 
-        
+
 
         #region Event Handlers ################################################
 
@@ -183,6 +188,7 @@ namespace HomeSync.Client {
                 programEpisodeTitle = libraryRecording.Program.EpisodeTitle,
                 programSeasonNumber = libraryRecording.Program.SeasonNumber,
                 programEpisodeNumber = libraryRecording.Program.EpisodeNumber,
+                fileName = libraryRecording.FileName,
                 fileSize = libraryRecording.FileSize,
                 startTime = libraryRecording.StartTime,
                 endTime = libraryRecording.EndTime,
@@ -215,21 +221,34 @@ namespace HomeSync.Client {
             // Write to Log
             log.WriteLine($"Setting Resume Points");
             var libraryRecordings = TVlibrary.Recordings;
+            // Set Index
             int currentIndex = 1;
+            // Iterate and Set WatchedFolders and Add to Library
             foreach (RecordingEntry entry in received.recordingEntries) {
                 // Write to Log
-                log.WriteLine($"({currentIndex} of {received.recordingEntries.Count}): \"{entry.programTitle}\"");
+                log.WriteLine($"({currentIndex} of {received.recordingEntries.Count}): Importing \"{entry.programTitle}\"");
+                // Set current status in Form
+                settings.SetStatus($"Importing recording {currentIndex} of {received.recordingEntries.Count}");
+                // Add Recording Path to WatchedFolders
+                AddWatchedFolder(entry.fileName);
+                // Add Recording to WMC Database
+                TVlibrary.GetOrAddRecordingForFile(entry.fileName);
+                // Increment Index
+                currentIndex++;
+            }
+            // Reset Index
+            currentIndex = 1;
+            // Iterate and Set Resume Points
+            foreach (RecordingEntry entry in received.recordingEntries) {
+                // Write to Log
+                log.WriteLine($"({currentIndex} of {received.recordingEntries.Count}): Setting \"{entry.programTitle}\"");
                 // Set current status in Form
                 settings.SetStatus($"Processing recording {currentIndex} of {received.recordingEntries.Count}");
                 libraryRecordings.FirstOrDefault(xx =>
-                    xx.Program.Title == entry.programTitle &&
-                    xx.Program.EpisodeTitle == entry.programEpisodeTitle &&
-                    xx.Program.SeasonNumber == entry.programSeasonNumber &&
-                    xx.Program.EpisodeNumber == entry.programEpisodeNumber &&
-                    xx.FileSize == entry.fileSize &&
-                    xx.StartTime == entry.startTime &&
-                    xx.EndTime == entry.endTime
+                    xx.FileName.ToLower() == entry.fileName.ToLower() &&
+                    xx.State == RecordingState.Recorded
                 )?.SetBookmark("MCE_shell", TimeSpan.Parse(entry.resumePoint));
+                // Increment Index
                 currentIndex++;
             }
             // Write to Log
@@ -238,6 +257,35 @@ namespace HomeSync.Client {
             settings.SetStatus("Ready");
         }
 
+        #endregion ############################################################
+
+
+        #region Watched Folders ###############################################
+
+        public static void AddWatchedFolder(string fileName) {
+            // Get Directory
+            string directory = Path.GetDirectoryName(fileName);
+            // Check if Directory exists in WatchedFolders List
+            if (!WatchedFolders.Contains(directory)) {
+                // Get Windows Media Center Recording Key
+                RegistryKey recordingKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Media Center\Service\Recording", true);
+                // Get Data from WatchedFolders Value
+                List<string> data = new List<string>((string[])recordingKey.GetValue("WatchedFolders"));
+                // Check if Directory exists in WatchedFolders Value
+                string location = data.FirstOrDefault(xx => xx.ToLower() == directory.ToLower());
+                // If Directory doesn't exist
+                if (location == null) {
+                    // Add Directory
+                    data.Add(directory);
+                    // Synthesise WatchedFolders Value
+                    recordingKey.SetValue("WatchedFolders", data.ToArray());
+                    // Add Directory to WatchedFolders List
+                    WatchedFolders.Add(directory);
+                }
+                // Close access to the Registry Key
+                recordingKey.Close();
+            }
+        }
         #endregion ############################################################
     }
 }
