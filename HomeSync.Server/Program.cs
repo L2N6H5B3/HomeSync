@@ -6,13 +6,14 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 using HomeSync.Classes.Recording;
 using HomeSync.Classes.Network;
 using System.Threading;
 using HomeSync.Classes;
+using Newtonsoft.Json;
 
-namespace HomeSync.Server {
+namespace HomeSync.Server
+{
 
 
     static class Program {
