@@ -128,8 +128,6 @@ namespace HomeSync.Client {
 
         }
 
-        
-
         #region Event Handlers ################################################
 
         private static void TVstore_StoredObjectUpdated(object sender, StoredObjectEventArgs e) {

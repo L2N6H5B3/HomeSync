@@ -112,15 +112,26 @@ namespace HomeSync.Server {
         #region Event Handlers ################################################
 
         private static void TVstore_StoredObjectUpdated(object sender, StoredObjectEventArgs e) {
-            // Get list of Recordings
+            System.Diagnostics.Debug.WriteLine($"StoreUpdated - EventType:{e.EventType}, ObjectType: {e.ObjectType}, ObjectID:{e.ObjectId}");
+
+            var obj = TVstore.Fetch(e.ObjectId);
+
+
+            //Recordings schedrec = TVlibrary.ScheduledRecordings;
+
+            //foreach (Recording rec in schedrec) {
+
+            //}
+
+            //// Get list of Recordings
             var libraryRecordings = TVlibrary.Recordings;
-            // Check if Object ID matches a Recording
-            var recording = libraryRecordings.FirstOrDefault(xx => xx.Id == e.ObjectId);
-            // If Recording Exists
-            if (recording != null) {
-                // Send the Resume Point Update
-                SendResumeUpdate(recording);
-            }
+            //// Check if Object ID matches a Recording
+            //var recording = libraryRecordings.FirstOrDefault(xx => xx.Id == e.ObjectId);
+            //// If Recording Exists
+            //if (recording != null) {
+            //    // Send the Resume Point Update
+            //    SendResumeUpdate(recording);
+            //}
         }
 
         private static void Server_ResponseEvent(object sender, ResponseArgs e) {

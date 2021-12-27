@@ -55,5 +55,9 @@ namespace HomeSync.Server {
             Show();
             WindowState = FormWindowState.Normal;
         }
+
+        private void textBox1_KeyDown(object sender, KeyEventArgs e) {
+            System.Diagnostics.Debug.WriteLine(((int)e.KeyCode));
+        }
     }
 }
