@@ -96,6 +96,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Enums.cs" />
     <Compile Include="Classes\Log.cs" />
     <Compile Include="Classes\Network\NetworkClient.cs" />
     <Compile Include="Classes\Network\NetworkDiscover.cs" />
