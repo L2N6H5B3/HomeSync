@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -7,21 +6,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace HomeSync.Classes.Network {
-    class NetworkServer {
+namespace HomeSync.Classes.NetworkOld {
+    class NetworkServerOld {
 
         private string data = null;
         private readonly Log log;
         private readonly Socket socket;
-        private readonly List<string> clients;
         private readonly IPHostEntry ipHostInfo;
         private readonly IPAddress ipAddress;
         private readonly IPEndPoint localEndPoint;
         public event EventHandler<ResponseArgs> ResponseEvent;
-        public event EventHandler<StatusArgs> StatusEvent;
-        public event EventHandler<HeartbeatArgs> HeartbeatEvent;
 
-        public NetworkServer(Log log) {
+        public NetworkServerOld(Log log) {
 
             this.log = log;
 
@@ -30,15 +26,12 @@ namespace HomeSync.Classes.Network {
             ipAddress = ipHostInfo.AddressList.First(xx => xx.AddressFamily == AddressFamily.InterNetwork);
             localEndPoint = new IPEndPoint(ipAddress, int.Parse(ConfigurationManager.AppSettings.Get("server-port")));
 
-            // Create a TCP/IP socket
+            // Create a TCP/IP socket.  
             socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            // Create a RegisteredClients List
-            clients = new List<string>();
         }
 
         public void Start() {
-            // Data buffer for incoming data.  
+            // Data buffer for incoming data 
             byte[] bytes = new Byte[1024];
 
             // Bind the socket to the local endpoint and listen for incoming connections
@@ -48,20 +41,11 @@ namespace HomeSync.Classes.Network {
 
                 // Start listening for connections
                 while (true) {
-                    // Write to Log
-                    log.WriteLine($"Ready for connection by other agents");
-                    // Set Status
-                    RefreshServerStatus("Ready");
                     // Program is suspended while waiting for an incoming connection
                     Socket client = socket.Accept();
                     data = null;
-
                     // Get Client IP Address
                     string clientAddress = (client.RemoteEndPoint as IPEndPoint).Address.ToString();
-                    // Write to Log
-                    log.WriteLine($"Client ({clientAddress}) Connected ");
-                    // Set Status
-                    RefreshServerStatus("Agent Downloading");
 
                     // An incoming connection needs to be processed
                     while (true) {
@@ -72,13 +56,6 @@ namespace HomeSync.Classes.Network {
                         }
                     }
 
-                    JsonConvert.DeserializeObject<NetworkClientRequest>
-
-                    // Get the Client Intent from the Response
-                    string clientIntent = data.Split('|')[0];
-
-
-
                     // Convert OK Data
                     byte[] msg = Encoding.ASCII.GetBytes("OK");
                     // Send OK to Client
@@ -88,35 +65,16 @@ namespace HomeSync.Classes.Network {
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
 
-                    // If the Client Intent is not Heartbeat
-                    if (clientIntent != "Heartbeat") {
-                        // Process Data
-                        ProcessRequest(data, clientAddress);
-                    } else {
-                        // Create new HeartbeatArgs
-                        HeartbeatArgs args = new HeartbeatArgs {
-                            // Set the ResponseArgs Response Data
-                            clientIp = clientAddress
-                        };
-                        // Raise Response Event
-                        HeartbeatEvent(this, args);
-                    }
+                    // Process Data
+                    ProcessRequest(data);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 // Write to Log
                 log.WriteLine($"Unexpected Exception: {e}");
-                // Set Status
-                RefreshServerStatus("Stopped");
             }
         }
 
-
-        public List<string> GetRegisteredClients() {
-            return clients;
-        }
-
-        private void ProcessRequest(string data, string clientAddress) {
+        private void ProcessRequest(string data) {
             // Split Message
             string[] dataArray = data.Split('|');
 
@@ -124,36 +82,16 @@ namespace HomeSync.Classes.Network {
             ResponseArgs args = new ResponseArgs {
                 // Set the ResponseArgs Response Data
                 responseType = dataArray[0],
-                response = dataArray[1],
-                clientIp = clientAddress
+                response = dataArray[1]
             };
             // Raise Response Event
             ResponseEvent(this, args);
-        }
-
-        private void RefreshServerStatus(string status) {
-            // Create new Response Args
-            StatusArgs args = new StatusArgs {
-                // Set the StatusArgs Response Data
-                status = status
-            };
-            // Raise Response Event
-            StatusEvent(this, args);
         }
     }
     
     class ResponseArgs : EventArgs {
         public string responseType;
         public string response;
-        public string clientIp;
-    }
-
-    class StatusArgs : EventArgs {
-        public string status;
-    }
-
-    class HeartbeatArgs : EventArgs {
-        public string clientIp;
     }
 }
 

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeSync.Client", "HomeSync.Client\HomeSync.Client.csproj", "{1CC08969-5660-46A3-8006-1EA7F2614BF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeSync.Agent", "HomeSync.Client\HomeSync.Agent.csproj", "{1CC08969-5660-46A3-8006-1EA7F2614BF5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeSync.Server", "HomeSync.Server\HomeSync.Server.csproj", "{479B92AC-27B9-44ED-AF82-69369FF89710}"
 EndProject

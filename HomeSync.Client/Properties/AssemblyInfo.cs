@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("HomeSync Client")]
+[assembly: AssemblyTitle("HomeSync Agent")]
 [assembly: AssemblyDescription("Syncronise media recording and playback across the network")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("HomeSync Client")]
+[assembly: AssemblyProduct("HomeSync Agent")]
 [assembly: AssemblyCopyright("Copyright © Luke Bradtke 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
-namespace HomeSync.Client {
+namespace HomeSync.Agent {
     public partial class Settings : Form {
-        public Settings() {
-            InitializeComponent();
-            serverAddressTextbox.Text = ConfigurationManager.AppSettings.Get("server-address");
-        }
 
         delegate void SetStatusCallback(string text);
+        public event EventHandler<AuthenticationKeyUpdateArgs> AuthenticationKeyUpdateEvent;
+
+        public Settings() {
+            InitializeComponent();
+            // Get Shared Passkey
+            sharedPasskeyTextbox.Text = ConfigurationManager.AppSettings.Get("shared-passkey");
+        }
 
         public void SetStatus(string text) {
             // InvokeRequired required compares the thread ID of the
@@ -30,14 +27,17 @@ namespace HomeSync.Client {
         }
 
         private void saveButton_Click(object sender, EventArgs e) {
-            ConfigurationManager.AppSettings.Set("server-address", serverAddressTextbox.Text);
+            // Set Authentication Key in Configuration
+            ConfigurationManager.AppSettings.Set("shared-passkey", sharedPasskeyTextbox.Text);
+            // Notify of Authentication Key Update
+            AuthenticationKeyUpdate(sharedPasskeyTextbox.Text);
+            // Hide Window
             Hide();
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e) {
             Show();
             WindowState = FormWindowState.Normal;
-
         }
 
         private void Settings_FormClosing(object sender, FormClosingEventArgs e) {
@@ -56,5 +56,27 @@ namespace HomeSync.Client {
             Show();
             WindowState = FormWindowState.Normal;
         }
+
+
+        #region Raise Event ###################################################
+
+        private void AuthenticationKeyUpdate(string passkey) {
+            // Create new Authentication Args
+            AuthenticationKeyUpdateArgs args = new AuthenticationKeyUpdateArgs {
+                passkey = passkey
+            };
+            // Raise Response Event
+            AuthenticationKeyUpdateEvent(this, args);
+        }
+
+        #endregion ############################################################
     }
+
+    #region Event Arguments ###################################################
+
+    public class AuthenticationKeyUpdateArgs : EventArgs {
+        public string passkey;
+    }
+
+    #endregion ################################################################
 }
