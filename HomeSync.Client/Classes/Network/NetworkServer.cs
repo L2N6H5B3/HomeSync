@@ -95,19 +95,19 @@ namespace HomeSync.Classes.Network.Server {
                     client.Shutdown(SocketShutdown.Both);
                     client.Close();
 
-                    // If the Client Intent is not Heartbeat
-                    if (clientIntent != "Heartbeat") {
-                        // Process Data
-                        ProcessRequest(data, clientAddress);
-                    } else {
-                        // Create new HeartbeatArgs
-                        HeartbeatArgs args = new HeartbeatArgs {
-                            // Set the ResponseArgs Response Data
-                            clientIp = clientAddress
-                        };
-                        // Raise Response Event
-                        HeartbeatEvent(this, args);
-                    }
+                    //// If the Client Intent is not Heartbeat
+                    //if (clientIntent != "Heartbeat") {
+                    //    // Process Data
+                    //    ProcessRequest(data, clientAddress);
+                    //} else {
+                    //    // Create new HeartbeatArgs
+                    //    HeartbeatArgs args = new HeartbeatArgs {
+                    //        // Set the ResponseArgs Response Data
+                    //        clientIp = clientAddress
+                    //    };
+                    //    // Raise Response Event
+                    //    HeartbeatEvent(this, args);
+                    //}
                 }
             }
             catch (Exception e) {
@@ -133,20 +133,20 @@ namespace HomeSync.Classes.Network.Server {
             return args.responseData;
         }
 
-        private void ProcessRequest(string data, string clientAddress) {
-            // Split Message
-            string[] dataArray = data.Split('|');
+        //private void ProcessRequest(string data, string clientAddress) {
+        //    // Split Message
+        //    string[] dataArray = data.Split('|');
 
-            // Create new ResponseArgs
-            ResponseArgs args = new ResponseArgs {
-                // Set the ResponseArgs Response Data
-                requestType = dataArray[0],
-                response = dataArray[1],
-                clientIp = clientAddress
-            };
-            // Raise Response Event
-            var result = ResponseEvent(this, args);
-        }
+        //    // Create new ResponseArgs
+        //    ResponseArgs args = new ResponseArgs {
+        //        // Set the ResponseArgs Response Data
+        //        requestType = dataArray[0],
+        //        response = dataArray[1],
+        //        clientIp = clientAddress
+        //    };
+        //    // Raise Response Event
+        //    var result = ResponseEvent(this, args);
+        //}
 
         private void RefreshServerStatus(string status) {
             // Create new Response Args

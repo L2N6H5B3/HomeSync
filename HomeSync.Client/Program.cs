@@ -1,6 +1,8 @@
 ﻿using CsvHelper;
+using HomeSync.Agent.Classes;
 using HomeSync.Classes;
 using HomeSync.Classes.Network;
+using HomeSync.Classes.Network.Client;
 using HomeSync.Classes.Network.Server;
 using HomeSync.Classes.Recording;
 using Microsoft.MediaCenter.Pvr;
@@ -29,8 +31,8 @@ namespace HomeSync.Agent {
         private static Library TVlibrary;
         private static NetworkServer server;
         private static NetworkDiscover networkDiscover;
-
         private static List<Classes.Recording.RecordingState> recordingStates;
+        private static int networkPort;
 
         /// <summary>
         /// The main entry point for the application.
@@ -44,6 +46,8 @@ namespace HomeSync.Agent {
             log = new Log();
             // Create Retry Object
             retry = new Retry();
+            // Set Network Port
+            networkPort = int.Parse(ConfigurationManager.AppSettings.Get("network-port"));
 
             #endregion ########################################################
 
@@ -109,65 +113,64 @@ namespace HomeSync.Agent {
             Application.SetCompatibleTextRenderingDefault(false);
             settings = new Settings();
 
+            // Add Settings Event Handlers
             settings.AuthenticationKeyUpdateEvent += Settings_AuthenticationKeyUpdateEvent;
 
             #endregion ########################################################
 
 
-            #region Register Client and Start Server ##########################
+            #region Configure Communication ###################################
 
             new Thread(() => {
                 // Set Thread to Background
                 Thread.CurrentThread.IsBackground = true;
 
-                #region Scan Network Discover #################################
+                #region Network Discover ######################################
 
                 // Set current status in Form
                 settings.SetStatus("Looking for other HomeSync agents");
                 // Create NetworkDiscover Agent
                 networkDiscover = new NetworkDiscover(ConfigurationManager.AppSettings.Get("network-port"));
-                // Scan the Local Network
-                networkDiscover.ScanLocalNetwork();
                 // Set current status in Form
                 settings.SetStatus("Ready");
 
                 #endregion ####################################################
 
+                #region Client Intialisation ###################################
 
-                #region  ###############################
+                // Iterate through each Active Host
+                foreach (string host in networkDiscover.GetActiveHosts()) {
+                    // Create Network Client
+                    NetworkClient client = new NetworkClient(host, networkPort, ConfigurationManager.AppSettings.Get("shared-passkey"), log);
+                    //// Add Event Handler for Server Retry
+                    //client.RetryEvent += Client_RetryEvent;
+                    //// Add Event Handler for Connection Status
+                    //client.StatusEvent += Client_StatusEvent;
+
+                    // Get all Recording Resume Points
+                    RecordingsJson clientSendAllResult = client.SendRequest(ClientRequest.SendAll);
+                    // If the Result is not null
+                    if (clientSendAllResult != null) {
+                        // Set Resume Points
+                        SetResumePoints(clientSendAllResult);
+                    }
+                }
 
                 #endregion ####################################################
 
-                //// Create Network Client
-                //NetworkClient client = new NetworkClient(log);
-                //// Add Event Handler for Server Retry
-                //client.RetryEvent += Client_RetryEvent;
-                //// Add Event Handler for Connection Status
-                //client.StatusEvent += Client_StatusEvent;
-                //// Connect Client
-                //client.Connect(retry);
-                //// Continue to Attempt to connect Client
-                //while (!client.IsConnected()) {
-                //    Thread.Sleep(10000);
-                //    client.Connect(retry);
-                //}
-
-                //// If Client is Connected
-                //if (client.IsConnected()) {
-                //    // Register Client
-                //    client.Register();
-                //}
-                //// Create Heartbeat
-                //client.CreateHeartbeat(retry);
+                #region Server Intialisation ###################################
 
                 // Create new Server
                 server = new NetworkServer(ConfigurationManager.AppSettings.Get("shared-passkey"), log);
                 // Add Event Handler for Agent Response
-                server.ResponseEvent += Agent_ResponseEvent;
+                server.ResponseEvent += Server_ResponseEvent;
                 // Set current status in Form
                 settings.SetStatus("Ready");
                 // Start Server
                 server.Start();
+
+                #endregion ####################################################
+
             }).Start();
 
             #endregion ########################################################
@@ -180,9 +183,6 @@ namespace HomeSync.Agent {
             #endregion ########################################################
 
         }
-
-
-
 
 
         #region Event Handlers ################################################
@@ -222,7 +222,7 @@ namespace HomeSync.Agent {
             server.UpdateAuthenticationKey(e.passkey);
         }
 
-        private static void Agent_ResponseEvent(object sender, ResponseArgs e) {
+        private static void Server_ResponseEvent(object sender, ResponseArgs e) {
             switch (e.requestType) {
                 case "UpdateAll":
                     // Send all Resume Point Data
@@ -236,7 +236,7 @@ namespace HomeSync.Agent {
             retry.Add(e.data);
         }
 
-        private static void Client_StatusEvent(object sender, StatusArgs e) {
+        private static void Client_StatusEvent(object sender, Classes.Network.Client.StatusArgs e) {
             // Set Status
             settings.SetStatus(e.status);
         }
@@ -302,68 +302,68 @@ namespace HomeSync.Agent {
             // Serialise RecordingsJson to String
             string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
 
-            // Iterate through each Client in RegisteredClients
-            foreach (string clientIp in server.GetRegisteredClients()) {
-                // Create Network Client
-                NetworkClient client = new NetworkClient(clientIp, log);
-                // Add Client RetryEvent Handler
-                client.RetryEvent += Client_RetryEvent;
-                // Send Resume Request to Client
-                bool result = client.SendResumeUpdate(recordingsJsonString);
-                // If the Request Completed Successfully
-                if (result) {
-                    // Write to Log
-                    log.WriteLine($"Sent \"{libraryRecording.Program.Title}\" resume position to Client ({clientIp})");
-                }
-            }
+            //// Iterate through each Client in RegisteredClients
+            //foreach (string clientIp in server.GetRegisteredClients()) {
+            //    // Create Network Client
+            //    NetworkClient client = new NetworkClient(clientIp, log);
+            //    // Add Client RetryEvent Handler
+            //    client.RetryEvent += Client_RetryEvent;
+            //    // Send Resume Request to Client
+            //    bool result = client.SendResumeUpdate(recordingsJsonString);
+            //    // If the Request Completed Successfully
+            //    if (result) {
+            //        // Write to Log
+            //        log.WriteLine($"Sent \"{libraryRecording.Program.Title}\" resume position to Client ({clientIp})");
+            //    }
+            //}
             // Set current status in Form
             settings.SetStatus("Ready");
         }
 
-        // Send a Specific Recording's Resume Point to Server
-        private static void SendResumeUpdate(Recording libraryRecording) {
-            // Write to Log
-            log.WriteLine($"Syncronising resume position: \"{libraryRecording.Program.Title}\"");
-            // Set current status in Form
-            settings.SetStatus("Syncing resume position");
+        //// Send a Specific Recording's Resume Point to Server
+        //private static void SendResumeUpdate(Recording libraryRecording) {
+        //    // Write to Log
+        //    log.WriteLine($"Syncronising resume position: \"{libraryRecording.Program.Title}\"");
+        //    // Set current status in Form
+        //    settings.SetStatus("Syncing resume position");
 
-            // Create RecordingsJson Object
-            RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
-            // Add RecordingEntry to RecordingsJson
-            recordingsJson.recordingEntries.Add(new RecordingEntry {
-                programTitle = libraryRecording.Program.Title,
-                programEpisodeTitle = libraryRecording.Program.EpisodeTitle,
-                programSeasonNumber = libraryRecording.Program.SeasonNumber,
-                programEpisodeNumber = libraryRecording.Program.EpisodeNumber,
-                fileSize = libraryRecording.FileSize,
-                startTime = libraryRecording.StartTime,
-                endTime = libraryRecording.EndTime,
-                resumePoint = libraryRecording.GetBookmark("MCE_shell").ToString()
-            });
-            // Serialise RecordingsJson to String
-            string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
+        //    // Create RecordingsJson Object
+        //    RecordingsJson recordingsJson = new RecordingsJson { recordingEntries = new List<RecordingEntry>() };
+        //    // Add RecordingEntry to RecordingsJson
+        //    recordingsJson.recordingEntries.Add(new RecordingEntry {
+        //        programTitle = libraryRecording.Program.Title,
+        //        programEpisodeTitle = libraryRecording.Program.EpisodeTitle,
+        //        programSeasonNumber = libraryRecording.Program.SeasonNumber,
+        //        programEpisodeNumber = libraryRecording.Program.EpisodeNumber,
+        //        fileSize = libraryRecording.FileSize,
+        //        startTime = libraryRecording.StartTime,
+        //        endTime = libraryRecording.EndTime,
+        //        resumePoint = libraryRecording.GetBookmark("MCE_shell").ToString()
+        //    });
+        //    // Serialise RecordingsJson to String
+        //    string recordingsJsonString = JsonConvert.SerializeObject(recordingsJson);
 
-            // Create Network Client
-            NetworkClient client = new NetworkClient(log);
-            // Add Event Handler for Server Retry
-            client.RetryEvent += Client_RetryEvent;
-            // Add Event Handler for Connection Status
-            client.StatusEvent += Client_StatusEvent;
-            // Connect Client
-            client.Connect(retry);
-            // Send Resume Request to Server
-            bool result = client.SendResumeUpdate(recordingsJsonString);
-            // If the Request Completed Successfully
-            if (result) {
-                // Write to Log
-                log.WriteLine($"Synchronised resume position: \"{libraryRecording.Program.Title}\"");
-            }
-            // Set current status in Form
-            settings.SetStatus("Ready");
-        }
+        //    // Create Network Client
+        //    NetworkClient client = new NetworkClient(log);
+        //    // Add Event Handler for Server Retry
+        //    client.RetryEvent += Client_RetryEvent;
+        //    // Add Event Handler for Connection Status
+        //    client.StatusEvent += Client_StatusEvent;
+        //    // Connect Client
+        //    client.Connect(retry);
+        //    // Send Resume Request to Server
+        //    bool result = client.SendResumeUpdate(recordingsJsonString);
+        //    // If the Request Completed Successfully
+        //    if (result) {
+        //        // Write to Log
+        //        log.WriteLine($"Synchronised resume position: \"{libraryRecording.Program.Title}\"");
+        //    }
+        //    // Set current status in Form
+        //    settings.SetStatus("Ready");
+        //}
 
         // Receive a Resume Point Update from Agent
-        private static void ReceiveResumeUpdate(RecordingsJson received) {
+        private static void SetResumePoints(RecordingsJson received) {
             // Write to Log
             log.WriteLine($"Setting Resume Points");
             var libraryRecordings = TVlibrary.Recordings;

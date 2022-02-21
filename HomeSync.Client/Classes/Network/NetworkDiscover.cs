@@ -4,19 +4,33 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace HomeSync.Classes.Network {
     class NetworkDiscover {
 
-        // Port to Discover
+        // Create Variables
         private readonly int port;
         private List<string> activeHosts;
+        private System.Timers.Timer refreshTimer;
 
         public NetworkDiscover(string port) {
             // Set the Port
             this.port = int.Parse(port);
             // Set the ActiveHosts List
-            this.activeHosts = new List<string>();
+            activeHosts = new List<string>();
+            // Scan the Local Network for Hosts
+            ScanLocalNetwork();
+
+            // Create Refresh Timer to Trigger Every 30 Seconds
+            refreshTimer = new System.Timers.Timer {
+                Interval = 30000
+            };
+            // Set Refresh Timer Elapsed Event Handler
+            refreshTimer.Elapsed += new ElapsedEventHandler(RefreshLocalNetwork);
+            // Start the Refresh Timer
+            refreshTimer.Start();
         }
 
         public List<string> GetActiveHosts() {
@@ -36,21 +50,32 @@ namespace HomeSync.Classes.Network {
 
                 TimeSpan timeSpan = new TimeSpan(0, 0, 0, 0, 100);
 
+                List<Task> tasks = new List<Task>();
+
                 // Iterate through all local Subnet IP Addresses
                 foreach (string ipString in localSubnetIpAddresses) {
-                    // Try and Catch any Problems
-                    try {
-                        // !! NEED TO ADD PASSKEY VERIFICATION HERE - CONFIRM THAT CONNECTION IS SUCCESSFUL !!
-                        using (var client = new TcpClient()) {
-                            var result = client.ConnectAsync(ipString, port);
-                            var success = result.Wait(timeSpan);
-                            client.EndConnect(result);
-                            // Add the Host
-                            activeHosts.Add(ipString);
+                    tasks.Add(Task.Run(() => {
+                        // Try and Catch Exceptions
+                        try {
+                            using (var client = new TcpClient()) {
+                                var result = client.ConnectAsync(ipString, port);
+                                var success = result.Wait(timeSpan);
+                                client.EndConnect(result);
+                                // Add the Host
+                                activeHosts.Add(ipString);
+                            }
                         }
-                    } catch { }
+                        catch (Exception) { }
+                    }));
                 }
+                // Wait for all tasks to complete
+                Task.WaitAll(tasks.ToArray());
             }
+        }
+
+        private void RefreshLocalNetwork(object sender, ElapsedEventArgs args) {
+            // Scan the Local Network
+            ScanLocalNetwork();
         }
 
         private static IPAddress GetLocalIPAddress() {
